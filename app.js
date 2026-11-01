@@ -5,7 +5,8 @@
    - Калькулятор BMR / TDEE / целевых ккал / БЖУ + круговая диаграмма
    - Тренировки: добавление упражнений и итоговый тоннаж
    - Сон: длительность по времени засыпания и пробуждения
-   - Питание: разбор CSV-выгрузки FatSecret («съел / цель / разница»)
+   - Питание: итоги за день — ручной ввод БЖУ, скриншот из FatSecret,
+     разбор CSV-выгрузки («съел / цель / разница»), FatSecret API (поиск продуктов)
    - Все данные сохраняются в localStorage
    ========================================================== */
 
@@ -32,7 +33,7 @@
     return Number.isInteger(n) ? String(n) : String(n);
   };
 
-  const KEYS = { profile: 'fit_profile', workout: 'fit_workout', sleep: 'fit_sleep' };
+  const KEYS = { profile: 'fit_profile', workout: 'fit_workout', sleep: 'fit_sleep', nutrition: 'fit_nutrition' };
 
   const load = (key, dflt) => {
     try {
@@ -400,7 +401,476 @@
     reader.readAsText(file, 'utf-8');
   });
 
-  /* ================= 5. Восстановление и запуск ================= */
+  /* ================= 5. Питание: итоги за день (ввод, скриншот, API) ================= */
+
+  const NUTRI = (() => {
+    const s = load(KEYS.nutrition, {}) || {};
+    return {
+      source: s.source || '',
+      manual: s.manual || null,
+      shot: s.shot || null,
+      api: Object.assign({ clientId: '', clientSecret: '', proxy: '', token: null, log: [] }, s.api || {}),
+    };
+  })();
+
+  const saveNutrition = () => store(KEYS.nutrition, NUTRI);
+
+  /* ---------- Вкладки внутри карточки «Питание» ---------- */
+
+  const segButtons = document.querySelectorAll('#food-card .seg-btn');
+
+  function showPanel(name) {
+    segButtons.forEach((b) => {
+      const on = b.dataset.panel === name;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    ['manual', 'shot', 'api', 'csv'].forEach((p) => {
+      const el = $('panel-' + p);
+      if (el) el.classList.toggle('hidden', p !== name);
+    });
+  }
+
+  segButtons.forEach((b) => b.addEventListener('click', () => showPanel(b.dataset.panel)));
+
+  /* ---------- Сводная таблица «съел / цель / разница» ---------- */
+
+  function resetSummary() {
+    nutritionBox.className = 'table-placeholder';
+    nutritionBox.textContent =
+      'Сводка «съел / цель / разница» за день появится после ввода итогов, поиска по API или загрузки CSV';
+  }
+
+  function renderSummary(t, sourceLabel) {
+    const rows = [
+      { label: 'Калории, ккал', ate: t.kcal, goal: lastResult ? lastResult.target : null },
+      { label: 'Белки, г', ate: t.protein, goal: lastResult ? lastResult.protein : null },
+      { label: 'Жиры, г', ate: t.fat, goal: lastResult ? lastResult.fat : null },
+      { label: 'Углеводы, г', ate: t.carbs, goal: lastResult ? lastResult.carbs : null },
+    ];
+
+    const head = '<tr><th>Показатель</th><th class="num">Съел</th><th class="num">Цель</th><th class="num">Разница</th></tr>';
+
+    const body = rows
+      .map((row) => {
+        const diff = row.goal == null ? null : row.ate - row.goal;
+        const cls = diff == null ? '' : diff > 0.5 ? 'diff-over' : diff < -0.5 ? 'diff-under' : '';
+        const diffText = diff == null ? '—' : (diff > 0 ? '+' : diff < 0 ? '−' : '') + fmt(Math.abs(Math.round(diff * 10) / 10));
+        return `<tr>
+          <td>${row.label}</td>
+          <td class="num">${fmt(Math.round(row.ate * 10) / 10)}</td>
+          <td class="num">${row.goal == null ? '—' : fmt(row.goal)}</td>
+          <td class="num ${cls}">${diffText}</td>
+        </tr>`;
+      })
+      .join('');
+
+    nutritionBox.className = '';
+    nutritionBox.innerHTML =
+      `<div class="table-wrap nutrition"><table>${head}${body}</table></div>` +
+      `<p class="hint">Источник: ${esc(sourceLabel)} • цель — из карточки «Результаты»</p>`;
+  }
+
+  /* ---------- A. Ручной ввод итогов за день ---------- */
+
+  const fsManualMsg = $('fs-manual-msg');
+
+  function setManualMsg(text, err) {
+    fsManualMsg.textContent = text;
+    fsManualMsg.classList.toggle('err', !!err);
+    fsManualMsg.classList.toggle('ok', !!text && !err);
+  }
+
+  $('fs-manual-show').addEventListener('click', () => {
+    const t = {
+      kcal: num($('fs-kcal').value),
+      protein: num($('fs-protein').value),
+      fat: num($('fs-fat').value),
+      carbs: num($('fs-carb').value),
+    };
+    if (!t.kcal && !t.protein && !t.fat && !t.carbs) {
+      setManualMsg('Введи хотя бы одну цифру', true);
+      return;
+    }
+    NUTRI.manual = t;
+    NUTRI.source = 'manual';
+    saveNutrition();
+    setManualMsg('Сохранено — сводка обновлена');
+    renderSummary(t, 'ручной ввод');
+  });
+
+  /* ---------- B. Скриншот из FatSecret ---------- */
+
+  const shotInput = $('fs-shot');
+  const shotPreview = $('shot-preview');
+  const shotImg = $('shot-img');
+  const fsShotMsg = $('fs-shot-msg');
+
+  function setShotMsg(text, err) {
+    fsShotMsg.textContent = text;
+    fsShotMsg.classList.toggle('err', !!err);
+    fsShotMsg.classList.toggle('ok', !!text && !err);
+  }
+
+  // Скриншот сжимается: максимум ~1000px по стороне, JPEG 0.72 — так строка
+  // занимает 50–150 КБ и спокойно влезает в localStorage (лимит ~5 МБ)
+  function shrinkShot(img, maxSide, q) {
+    const sc = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas');
+    c.width = Math.max(1, Math.round(img.naturalWidth * sc));
+    c.height = Math.max(1, Math.round(img.naturalHeight * sc));
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', q);
+  }
+
+  function showShot() {
+    if (NUTRI.shot && NUTRI.shot.data) {
+      shotImg.src = NUTRI.shot.data;
+      shotPreview.classList.remove('hidden');
+    } else {
+      shotImg.removeAttribute('src');
+      shotPreview.classList.add('hidden');
+    }
+  }
+
+  shotInput.addEventListener('change', () => {
+    const file = shotInput.files && shotInput.files[0];
+    if (!file) return;
+    if (!/^image\//.test(file.type)) {
+      setShotMsg('Это не фото. Нужен скриншот в PNG или JPG', true);
+      return;
+    }
+    setShotMsg('Обрабатываю фото…');
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      try {
+        let max = 1000;
+        let data = shrinkShot(img, max, 0.72);
+        while (data.length > 1500000 && max > 500) {
+          max = Math.round(max * 0.7);
+          data = shrinkShot(img, max, 0.6);
+        }
+        if (data.length > 2500000) throw new Error('фото слишком большое');
+        NUTRI.shot = { data, date: new Date().toLocaleDateString('ru-RU') };
+        saveNutrition();
+        showShot();
+        setShotMsg('Сохранено на этом устройстве' + (NUTRI.shot.date ? ' • ' + NUTRI.shot.date : ''));
+      } catch {
+        setShotMsg('Фото не обработалось — попробуй скриншот меньшего размера', true);
+      } finally {
+        URL.revokeObjectURL(url);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      setShotMsg('Не удалось открыть фото', true);
+    };
+    img.src = url;
+  });
+
+  $('shot-del').addEventListener('click', () => {
+    NUTRI.shot = null;
+    saveNutrition();
+    shotInput.value = '';
+    showShot();
+    setShotMsg('Скриншот удалён');
+  });
+
+  /* ---------- C. FatSecret API ---------- */
+
+  const FS_TOKEN = 'https://oauth.fatsecret.com/connect/token';
+  const FS_SERVER = 'https://platform.fatsecret.com/rest/server.api';
+  const fsStatus = $('fs-status');
+
+  function apiStatus(text, err) {
+    fsStatus.textContent = text;
+    fsStatus.classList.toggle('err', !!err);
+    fsStatus.classList.toggle('ok', !!text && !err);
+  }
+
+  // Необязательный CORS-прокси: «https://…/счётчик?url=» (с «=» на конце) — URL кодируем,
+  // иначе пристраиваем адрес как есть
+  function viaProxy(u) {
+    const p = (NUTRI.api.proxy || '').trim();
+    if (!p) return u;
+    return p.endsWith('=') ? p + encodeURIComponent(u) : p + u;
+  }
+
+  function failText(e) {
+    const msg = (e && e.message) || String(e);
+    let t = 'Не вышло: ' + msg;
+    if (/Failed to fetch|NetworkError|Load failed|AbortError/i.test(msg)) {
+      t += ' • Скорее всего, браузер заблокировал запрос (CORS) или нет сети: FatSecret официально пускает токены только через сервер/прокси — впиши адрес своего прокси в поле выше.';
+    }
+    if (/IP|proxy|invalid|credentials/i.test(msg)) {
+      t += ' • Проверь ключи и список разрешённых адресов в настройках приложения на platform.fatsecret.com.';
+    }
+    return t;
+  }
+
+  async function getToken() {
+    const a = NUTRI.api;
+    const id = (a.clientId || '').trim();
+    const secret = (a.clientSecret || '').trim();
+    if (!id || !secret) throw new Error('Сначала заполни Client ID и Client Secret');
+
+    if (a.token && a.token.exp && Date.now() < a.token.exp) return a.token.accessToken;
+
+    apiStatus('Запрашиваю токен…');
+    let res;
+    try {
+      res = await fetch(viaProxy(FS_TOKEN), {
+        method: 'POST',
+        headers: {
+          Authorization: 'Basic ' + btoa(unescape(encodeURIComponent(id + ':' + secret))),
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'grant_type=client_credentials&scope=basic',
+      });
+    } catch {
+      throw new Error('Failed to fetch');
+    }
+    if (res.status === 400 || res.status === 401 || res.status === 403) {
+      throw new Error('FatSecret отказал в токене (HTTP ' + res.status + ') — проверь Client ID / Secret и разрешённые IP приложения');
+    }
+    if (!res.ok) throw new Error('токен, HTTP ' + res.status);
+    const t = await res.json();
+    if (!t.access_token) throw new Error('токен не получен');
+    a.token = { accessToken: t.access_token, exp: Date.now() + Math.max(60, ((t.expires_in || 86400) - 300)) * 1000 };
+    saveNutrition();
+    return a.token.accessToken;
+  }
+
+  async function fsApi(method, params) {
+    const token = await getToken();
+    const qs = new URLSearchParams(Object.assign({ method, format: 'json' }, params));
+    let res;
+    try {
+      res = await fetch(viaProxy(FS_SERVER + '?' + qs), { headers: { Authorization: 'Bearer ' + token } });
+    } catch {
+      throw new Error('Failed to fetch');
+    }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error((data.error.message || data.error.code || 'ошибка API'));
+    return data;
+  }
+
+  let apiResults = [];
+  let picked = null;
+
+  $('fs-connect').addEventListener('click', async () => {
+    NUTRI.api.clientId = $('fs-client-id').value.trim();
+    NUTRI.api.clientSecret = $('fs-secret').value.trim();
+    NUTRI.api.proxy = $('fs-proxy').value.trim();
+    saveNutrition();
+    apiStatus('Подключаюсь…');
+    try {
+      await getToken();
+      $('api-search').classList.remove('hidden');
+      $('fs-log-block').classList.toggle('hidden', !(NUTRI.api.log || []).length);
+      renderLog();
+      apiStatus('Подключено — можно искать продукты');
+    } catch (e) {
+      apiStatus(failText(e), true);
+    }
+  });
+
+  async function runSearch() {
+    const q = $('fs-query').value.trim();
+    if (!q) return;
+    apiStatus('Ищу «' + q + '»…');
+    try {
+      const d = await fsApi('foods.search', { search_expression: q, max_results: '8' });
+      const fs = d && d.foods_search;
+      let list = fs && fs.results && fs.results.food;
+      if (list && !Array.isArray(list)) list = [list];
+      apiResults = list || [];
+      if (!apiResults.length) {
+        $('fs-results').innerHTML = '';
+        apiStatus('Ничего не нашлось. База API — США: набирай латиницей, например «chicken breast» или «buckwheat»', true);
+        return;
+      }
+      $('fs-results').innerHTML = apiResults
+        .map((f, i) => {
+          const brand = f.brand_name ? ' <span class="api-brand">· ' + esc(f.brand_name) + '</span>' : '';
+          return `<button type="button" class="api-item" data-i="${i}"><b>${esc(f.food_name)}</b>${brand}</button>`;
+        })
+        .join('');
+      picked = null;
+      $('fs-pick').classList.add('hidden');
+      apiStatus('Нашлось: ' + (fs.total_results || apiResults.length) + ' — выбери продукт');
+    } catch (e) {
+      $('fs-results').innerHTML = '';
+      apiStatus(failText(e), true);
+    }
+  }
+
+  $('fs-search-btn').addEventListener('click', runSearch);
+  $('fs-query').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); runSearch(); } });
+
+  $('fs-results').addEventListener('click', async (e) => {
+    const b = e.target.closest('.api-item');
+    if (!b) return;
+    const f = apiResults[parseInt(b.dataset.i, 10)];
+    if (!f) return;
+    apiStatus('Загружаю порции «' + f.food_name + '»…');
+    try {
+      let d;
+      try {
+        d = await fsApi('food.get.v4', { food_id: f.food_id });
+      } catch {
+        d = await fsApi('food.get.v3', { food_id: f.food_id });
+      }
+      const food = (d && d.food) || {};
+      let srv = food.servings && food.servings.serving;
+      if (!srv) throw new Error('в ответе нет порций');
+      if (!Array.isArray(srv)) srv = [srv];
+      picked = { name: food.food_name || f.food_name, servings: srv };
+
+      $('fs-serving').innerHTML = srv
+        .map((s, i) => {
+          const grams = s.metric_serving_amount && s.metric_serving_unit
+            ? ' (≈' + fmt(num(s.metric_serving_amount)) + ' ' + s.metric_serving_unit + ')'
+            : '';
+          return `<option value="${i}">${esc((s.serving_description || 'порция') + grams)} — ${fmt(num(s.calories))} ккал</option>`;
+        })
+        .join('');
+      $('fs-qty').value = '1';
+      $('fs-pick').classList.remove('hidden');
+      updatePickInfo();
+      apiStatus('Выбери порцию и количество → добавь в день');
+    } catch (err) {
+      apiStatus(failText(err), true);
+    }
+  });
+
+  function pickedTotals() {
+    if (!picked) return null;
+    const s = picked.servings[parseInt($('fs-serving').value || '0', 10)] || picked.servings[0];
+    const q = Math.max(0.05, num($('fs-qty').value) || 1);
+    return {
+      s,
+      q,
+      kcal: num(s.calories) * q,
+      protein: num(s.protein) * q,
+      fat: num(s.fat) * q,
+      carbs: num(s.carbohydrate) * q,
+    };
+  }
+
+  function updatePickInfo() {
+    const t = pickedTotals();
+    if (!t) { $('fs-pick-info').textContent = ''; return; }
+    const grams = t.s.metric_serving_amount && t.s.metric_serving_unit
+      ? fmt(num(t.s.metric_serving_amount) * t.q) + ' ' + t.s.metric_serving_unit + ': '
+      : '';
+    $('fs-pick-info').textContent = grams + fmt(t.kcal) + ' ккал • Б ' + fmt(t.protein) + ' • Ж ' + fmt(t.fat) + ' • У ' + fmt(t.carbs);
+  }
+
+  $('fs-serving').addEventListener('change', updatePickInfo);
+  $('fs-qty').addEventListener('input', updatePickInfo);
+
+  $('fs-add').addEventListener('click', () => {
+    const t = pickedTotals();
+    if (!t) return;
+    const opt = $('fs-serving').selectedOptions[0];
+    NUTRI.api.log.push({
+      name: picked.name,
+      serving: opt ? String(opt.textContent).split(' (≈')[0].split(' — ')[0] : '',
+      qty: t.q,
+      kcal: Math.round(t.kcal * 10) / 10,
+      protein: Math.round(t.protein * 10) / 10,
+      fat: Math.round(t.fat * 10) / 10,
+      carbs: Math.round(t.carbs * 10) / 10,
+    });
+    saveNutrition();
+    renderLog();
+    applyApiSummary();
+    $('fs-qty').value = '1';
+    updatePickInfo();
+    apiStatus('Добавлено: ' + picked.name);
+  });
+
+  function apiTotals() {
+    return (NUTRI.api.log || []).reduce(
+      (s, r) => ({ kcal: s.kcal + r.kcal, protein: s.protein + r.protein, fat: s.fat + r.fat, carbs: s.carbs + r.carbs }),
+      { kcal: 0, protein: 0, fat: 0, carbs: 0 }
+    );
+  }
+
+  function renderLog() {
+    const log = NUTRI.api.log || [];
+    $('fs-log-block').classList.toggle('hidden', !log.length);
+    $('fs-log').innerHTML = log.map((r, i) => `
+      <li>
+        <span class="log-name">${esc(r.name)}${r.qty && r.qty !== 1 ? ' × ' + fmt(r.qty) : ''}<small>${esc(r.serving || '')}</small></span>
+        <span class="log-kcal">${fmt(r.kcal)} ккал</span>
+        <button type="button" class="del-btn" data-i="${i}" aria-label="Убрать">×</button>
+      </li>`).join('');
+  }
+
+  function applyApiSummary() {
+    const log = NUTRI.api.log || [];
+    if (!log.length) return;
+    NUTRI.source = 'api';
+    saveNutrition();
+    renderSummary(apiTotals(), 'FatSecret API • ' + log.length + ' блюд');
+  }
+
+  $('fs-log').addEventListener('click', (e) => {
+    const b = e.target.closest('.del-btn');
+    if (!b) return;
+    NUTRI.api.log.splice(parseInt(b.dataset.i, 10), 1);
+    saveNutrition();
+    renderLog();
+    if (NUTRI.api.log.length) applyApiSummary();
+    else if (NUTRI.source === 'api') { NUTRI.source = ''; saveNutrition(); resetSummary(); }
+  });
+
+  $('fs-clear').addEventListener('click', () => {
+    NUTRI.api.log = [];
+    saveNutrition();
+    renderLog();
+    if (NUTRI.source === 'api') { NUTRI.source = ''; saveNutrition(); resetSummary(); }
+    apiStatus('День очищен');
+  });
+
+  /* ---------- Восстановление питания при загрузке — вызывается из restore() ---------- */
+
+  function initFoodUI() {
+    showPanel('manual');
+    showShot();
+    renderLog();
+
+    const a = NUTRI.api;
+    if (a.clientId) $('fs-client-id').value = a.clientId;
+    if (a.clientSecret) $('fs-secret').value = a.clientSecret;
+    if (a.proxy) $('fs-proxy').value = a.proxy;
+    if (a.clientId && a.token && a.token.exp && Date.now() < a.token.exp) {
+      $('api-search').classList.remove('hidden');
+      apiStatus('Токен из кэша — можно искать продукты');
+    }
+
+    const m = NUTRI.manual;
+    if (m) {
+      $('fs-kcal').value = m.kcal || '';
+      $('fs-protein').value = m.protein || '';
+      $('fs-fat').value = m.fat || '';
+      $('fs-carb').value = m.carbs || '';
+    }
+
+    if (NUTRI.source === 'manual' && m) renderSummary(m, 'ручной ввод');
+    else if (NUTRI.source === 'api' && (NUTRI.api.log || []).length) {
+      renderSummary(apiTotals(), 'FatSecret API • ' + NUTRI.api.log.length + ' блюд');
+    }
+  }
+
+  /* ================= 6. Восстановление и запуск ================= */
 
   function restore() {
     // Сон
@@ -424,6 +894,7 @@
       calculate();
     }
 
+    initFoodUI();
     renderWorkout();
   }
 
