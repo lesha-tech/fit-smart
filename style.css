@@ -1,0 +1,627 @@
+/* ==========================================================
+   FIT SMART — тёмная спортивная тема (чистый CSS, без фреймворков)
+   ========================================================== */
+
+:root {
+  color-scheme: dark;
+
+  --bg: #0d0d0d;
+  --bg-soft: #141414;
+  --card: #1e1e1e;
+  --card-2: #262626;
+  --border: #2e2e2e;
+
+  --text: #f2f2f2;
+  --muted: #9b9b9b;
+
+  --accent: #ff6b00;
+  --accent-hover: #ff8433;
+  --warn-text: #ffb775;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(900px 420px at 85% -80px, rgba(255, 107, 0, .10), transparent 65%),
+    var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: rgba(255, 107, 0, .35); }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.hidden { display: none !important; }
+
+.accent { color: var(--accent); }
+
+/* ---------- Шапка ---------- */
+
+.site-header {
+  padding: 24px 0 18px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #141414, var(--bg));
+}
+
+.header-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 18px;
+}
+
+.logo {
+  margin: 0;
+  font-size: clamp(2rem, 5.5vw, 3.2rem);
+  font-weight: 900;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1.05;
+}
+
+.tagline {
+  margin: 0;
+  color: var(--muted);
+  font-size: .95rem;
+  letter-spacing: .4px;
+}
+
+/* ---------- Основная область ---------- */
+
+.main-content {
+  padding-top: 24px;
+  padding-bottom: 40px;
+}
+
+.top-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+  align-items: start;
+}
+
+.stack { display: grid; gap: 20px; }
+
+/* ---------- Карточки ---------- */
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  min-width: 0;
+}
+
+.card h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px;
+  font-size: 1.2rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+.card h2::before {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 22px;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+/* ---------- Поля ввода ---------- */
+
+.field { min-width: 0; }
+
+.field > label,
+.field-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: .74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--muted);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.form-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.form-grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 16px; }
+.form-grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+.form-grid .wide { grid-column: 1 / -1; }
+.form-grid .btn { align-self: end; }
+
+input[type="number"],
+input[type="time"],
+input[type="text"],
+select {
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+select option { background: var(--bg-soft); color: var(--text); }
+
+::placeholder { color: #6d6d6d; opacity: 1; }
+
+input[type="number"]:focus,
+input[type="time"]:focus,
+input[type="text"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, .22);
+}
+
+input[readonly] {
+  color: var(--muted);
+  background: #171717;
+  cursor: default;
+}
+
+/* ---------- Радио-кнопки ---------- */
+
+.radio-field {
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+}
+
+.radio-field legend {
+  padding: 0;
+  margin-bottom: 6px;
+  font-size: .74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--muted);
+}
+
+.radio-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: .92rem;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease;
+}
+
+.radio:hover { border-color: #3d3d3d; }
+
+.radio:has(input:checked) {
+  border-color: var(--accent);
+  background: rgba(255, 107, 0, .08);
+}
+
+.radio input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+/* ---------- Кнопки ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 12px 22px;
+  font: inherit;
+  font-weight: 800;
+  letter-spacing: .4px;
+  color: #140f08;
+  background: var(--accent);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(255, 107, 0, .25);
+  transition: background-color .15s ease, box-shadow .15s ease, transform .08s ease;
+}
+
+.btn:hover { background: var(--accent-hover); }
+
+.btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, .2);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.btn-full { width: 100%; }
+
+/* ---------- Результаты ---------- */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  min-width: 0;
+}
+
+.stat-label {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.stat-value {
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: break-word;
+}
+
+.stat.highlight .stat-value { color: var(--accent); }
+
+.stat-unit {
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--muted);
+}
+
+.macros {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.macro {
+  padding: 12px 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  min-width: 0;
+}
+
+.macro-name {
+  display: block;
+  margin-bottom: 4px;
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+}
+
+.macro-grams {
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-hint {
+  margin: 0 0 10px;
+  font-size: .85rem;
+  color: var(--muted);
+}
+
+.chart-box {
+  display: flex;
+  flex-direction: column;
+  height: 260px;
+  padding: 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.chart-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.chart-box canvas { max-width: 100%; }
+
+/* ---------- Подсказки ---------- */
+
+.hint {
+  margin: 8px 0 0;
+  font-size: .82rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+/* Группы мышц в выпадающем списке */
+select optgroup {
+  background: #181818;
+  color: var(--accent);
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: .5px;
+}
+
+select option { padding: 4px 10px; }
+
+/* ---------- Предупреждение ---------- */
+
+.warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: rgba(255, 107, 0, .12);
+  border: 1px solid rgba(255, 107, 0, .55);
+  border-radius: 10px;
+  color: var(--warn-text);
+  font-size: .88rem;
+  line-height: 1.4;
+}
+
+.warning-icon { flex: none; }
+
+/* ---------- Таблицы ---------- */
+
+.table-wrap {
+  margin-top: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow-x: auto;
+}
+
+.table-wrap table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: .9rem;
+}
+
+.table-wrap th,
+.table-wrap td { padding: 10px 14px; text-align: left; }
+
+.table-wrap thead th {
+  background: var(--card-2);
+  border-bottom: 1px solid var(--border);
+  font-size: .7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.table-wrap tbody td { border-top: 1px solid var(--border); }
+
+.table-wrap tbody tr:hover { background: rgba(255, 255, 255, .03); }
+
+.table-wrap tbody .empty td {
+  color: var(--muted);
+  font-style: italic;
+  text-align: center;
+}
+
+.table-wrap tfoot td {
+  background: var(--card-2);
+  border-top: 2px solid var(--border);
+  font-weight: 700;
+}
+
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.tonnage-total {
+  color: var(--accent);
+  font-size: 1.05rem;
+}
+
+/* ---------- Файл CSV ---------- */
+
+input[type="file"] {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font: inherit;
+}
+
+input[type="file"]::file-selector-button {
+  padding: 8px 16px;
+  margin-right: 12px;
+  background: var(--accent);
+  color: #140f08;
+  border: none;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color .15s ease;
+}
+
+input[type="file"]::file-selector-button:hover { background: var(--accent-hover); }
+
+.table-placeholder {
+  margin-top: 16px;
+  padding: 26px 16px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  text-align: center;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+/* ---------- Подвал ---------- */
+
+.site-footer {
+  padding: 18px 0 26px;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: .85rem;
+  text-align: center;
+}
+
+.site-footer p { margin: 0; }
+
+/* ---------- Адаптивность ---------- */
+
+/* Ноутбук и уже: форма и результаты в одну колонку */
+@media (max-width: 920px) {
+  .top-grid { grid-template-columns: 1fr; }
+}
+
+/* Телефон: всё в один столбец */
+@media (max-width: 620px) {
+  .field-row,
+  .form-grid.two,
+  .form-grid.three,
+  .stats-grid,
+  .macros { grid-template-columns: 1fr; }
+
+  .card { padding: 18px 16px 20px; }
+
+  .stat-value { font-size: 1.4rem; }
+
+  .main-content { padding-top: 16px; }
+}
+
+/* ==========================================================
+   Логика (этап 2): диаграмма-фолбэк, таблица питания, кнопки удаления
+   ========================================================== */
+
+/* Оффлайн-диаграмма БЖУ (если Chart.js с CDN не загрузился) */
+.donut-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin: auto;
+}
+
+.donut-css {
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .35);
+}
+
+.donut-hole {
+  width: 62%;
+  height: 62%;
+  border-radius: 50%;
+  background: var(--card);
+}
+
+.legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 14px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .78rem;
+  color: var(--muted);
+}
+
+.dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* Кнопка удаления упражнения в таблице */
+.del-col { width: 36px; }
+
+.del-btn {
+  padding: 4px 10px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color .15s ease;
+}
+
+.del-btn:hover { color: #ff6f61; }
+
+/* Разница «съел − цель» в таблице питания */
+.diff-over { color: #ff6f61; }
+.diff-under { color: #a3e635; }
+
+/* Таблице питания из 4 колонок не нужен широкий скролл */
+.nutrition table { min-width: 420px; }
