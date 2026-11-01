@@ -283,13 +283,119 @@
       <section class="card" id="food-card" aria-labelledby="food-title">
         <h2 id="food-title">Питание (FatSecret)</h2>
 
-        <div class="field">
-          <label for="csv-file">Загрузить CSV из FatSecret</label>
-          <input type="file" id="csv-file" name="csv-file" accept=".csv">
+        <div class="seg" role="tablist" aria-label="Способ ввода питания за день">
+          <button type="button" class="seg-btn active" role="tab" aria-selected="true" data-panel="manual">Итоги вручную</button>
+          <button type="button" class="seg-btn" role="tab" aria-selected="false" data-panel="shot">Скриншот</button>
+          <button type="button" class="seg-btn" role="tab" aria-selected="false" data-panel="api">FatSecret API</button>
+          <button type="button" class="seg-btn" role="tab" aria-selected="false" data-panel="csv">CSV</button>
         </div>
 
         <div class="table-placeholder" id="nutrition-table">
-          Таблица «съел / цель / разница» появится после загрузки CSV (этап 2)
+          Сводка «съел / цель / разница» за день появится после ввода итогов, поиска по API или загрузки CSV
+        </div>
+
+        <!-- A. Ручной ввод итогов за день -->
+        <div class="nutri-panel" id="panel-manual" role="tabpanel">
+          <h3>Итоговое БЖУ за день</h3>
+          <div class="form-grid four">
+            <div class="field">
+              <label for="fs-kcal">Ккал</label>
+              <input type="number" id="fs-kcal" name="fs-kcal" min="0" max="10000" step="1" placeholder="0">
+            </div>
+            <div class="field">
+              <label for="fs-protein">Белки, г</label>
+              <input type="number" id="fs-protein" name="fs-protein" min="0" max="600" step="1" placeholder="0">
+            </div>
+            <div class="field">
+              <label for="fs-fat">Жиры, г</label>
+              <input type="number" id="fs-fat" name="fs-fat" min="0" max="400" step="1" placeholder="0">
+            </div>
+            <div class="field">
+              <label for="fs-carb">Углеводы, г</label>
+              <input type="number" id="fs-carb" name="fs-carb" min="0" max="1000" step="1" placeholder="0">
+            </div>
+          </div>
+          <button type="button" class="btn" id="fs-manual-show">Показать в таблице</button>
+          <p class="status-hint" id="fs-manual-msg"></p>
+          <p class="hint">Смотри итог за день в FatSecret («Средние значения за день») и введи цифры сюда — сравним с твоей целью из «Профиля».</p>
+        </div>
+
+        <!-- B. Скриншот из FatSecret -->
+        <div class="nutri-panel hidden" id="panel-shot" role="tabpanel">
+          <h3>Скриншот из FatSecret</h3>
+          <div class="field">
+            <label for="fs-shot">Выбрать фото (PNG / JPG)</label>
+            <input type="file" id="fs-shot" name="fs-shot" accept="image/*">
+          </div>
+          <p class="status-hint" id="fs-shot-msg"></p>
+          <div class="shot-preview hidden" id="shot-preview">
+            <img id="shot-img" alt="Скриншот FatSecret">
+            <button type="button" class="btn-mini" id="shot-del">Удалить скриншот</button>
+          </div>
+          <p class="hint">Скриншот хранится прямо на этом устройстве (localStorage) и никуда не отправляется.</p>
+        </div>
+
+        <!-- C. FatSecret API -->
+        <div class="nutri-panel hidden" id="panel-api" role="tabpanel">
+          <h3>FatSecret API — поиск продуктов</h3>
+          <div class="field-row">
+            <div class="field">
+              <label for="fs-client-id">Client ID</label>
+              <input type="text" id="fs-client-id" name="fs-client-id" autocomplete="off" placeholder="ключ приложения">
+            </div>
+            <div class="field">
+              <label for="fs-secret">Client Secret</label>
+              <input type="password" id="fs-secret" name="fs-secret" autocomplete="off" placeholder="секрет приложения">
+            </div>
+            <div class="field">
+              <label for="fs-proxy">CORS-прокси (опционально)</label>
+              <input type="text" id="fs-proxy" name="fs-proxy" autocomplete="off" placeholder="https://...?url=">
+            </div>
+          </div>
+          <button type="button" class="btn" id="fs-connect">Подключить / получить токен</button>
+          <p class="status-hint" id="fs-status"></p>
+
+          <div class="hidden" id="api-search">
+            <div class="field">
+              <label for="fs-query">Название продукта</label>
+              <input type="text" id="fs-query" name="fs-query" autocomplete="off" placeholder="chicken breast">
+            </div>
+            <button type="button" class="btn" id="fs-search-btn">Найти</button>
+            <div class="api-results" id="fs-results"></div>
+          </div>
+
+          <div class="hidden" id="fs-pick">
+            <div class="form-grid two">
+              <div class="field">
+                <label for="fs-serving">Порция</label>
+                <select id="fs-serving"></select>
+              </div>
+              <div class="field">
+                <label for="fs-qty">Количество, порций</label>
+                <input type="number" id="fs-qty" name="fs-qty" min="0.05" max="50" step="0.1" placeholder="1">
+              </div>
+            </div>
+            <p class="hint" id="fs-pick-info"></p>
+            <button type="button" class="btn" id="fs-add">Добавить в день</button>
+          </div>
+
+          <div class="hidden" id="fs-log-block">
+            <h3>Добавлено за день</h3>
+            <ul id="fs-log"></ul>
+            <button type="button" class="btn-mini" id="fs-clear">Очистить день</button>
+          </div>
+
+          <p class="hint">Ключи: создай бесплатное приложение на <a href="https://platform.fatsecret.com/register" target="_blank" rel="noopener">platform.fatsecret.com</a> и вставь Client ID / Secret сюда — они хранятся только на твоём устройстве. База API — США, набирай названия латиницей. FatSecret официально разрешает токены только через сервер/прокси: если браузер заблокирует запрос — впиши адрес своего прокси в поле выше. Скриншот и ручной ввод работают всегда.</p>
+        </div>
+
+        <!-- D. CSV-выгрузка -->
+        <div class="nutri-panel hidden" id="panel-csv" role="tabpanel">
+          <h3>CSV-выгрузка за месяц</h3>
+          <div class="field">
+            <label for="csv-file">Загрузить CSV из FatSecret</label>
+            <input type="file" id="csv-file" name="csv-file" accept=".csv">
+          </div>
+          <p class="hint">CSV — это дневник за месяцы: покажется среднее значение за день.</p>
         </div>
       </section>
 
