@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIT SMART — калории, БЖУ, тренировки, сон</title>
+  <!-- Chart.js подключим на этапе 2 -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 1. Шапка -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <h1 class="logo">FIT&nbsp;<span class="accent">SMART</span></h1>
+      <p class="tagline">калории, БЖУ, тренировки, сон</p>
+    </div>
+  </header>
+
+  <main class="container main-content">
+
+    <!-- Верхняя сетка: форма слева, результаты справа -->
+    <div class="top-grid">
+
+      <!-- 2. Профиль -->
+      <section class="card" id="profile-card" aria-labelledby="profile-title">
+        <h2 id="profile-title">Профиль</h2>
+
+        <form id="profile-form" autocomplete="off">
+          <fieldset class="radio-field">
+            <legend>Пол</legend>
+            <div class="radio-row">
+              <label class="radio">
+                <input type="radio" name="gender" value="male" checked>
+                <span>Мужской</span>
+              </label>
+              <label class="radio">
+                <input type="radio" name="gender" value="female">
+                <span>Женский</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="age">Возраст</label>
+              <input type="number" id="age" name="age" min="14" max="90" step="1" placeholder="лет" required>
+            </div>
+            <div class="field">
+              <label for="weight">Вес, кг</label>
+              <input type="number" id="weight" name="weight" min="30" max="300" step="0.1" placeholder="кг" required>
+            </div>
+            <div class="field">
+              <label for="height">Рост, см</label>
+              <input type="number" id="height" name="height" min="120" max="250" step="1" placeholder="см" required>
+            </div>
+                               </div>
+          <div class="form-grid two">
+            <div class="field">
+              <label for="activity">Уровень активности</label>
+              <select id="activity" name="activity">
+                <option value="1.2">Минимум — 1.2</option>
+                <option value="1.375">Лёгкая — 1.375</option>
+                <option value="1.55" selected>Средняя — 1.55</option>
+                <option value="1.725">Высокая — 1.725</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="goal">Цель</label>
+              <select id="goal" name="goal">
+                <option value="gain">Набор массы</option>
+                <option value="cut">Сушка</option>
+                <option value="maintain" selected>Поддержание</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-full" id="calc-btn">Рассчитать</button>
+        </form>
+      </section>
+
+      <!-- 3. Результаты (скрыт до расчёта) -->
+      <section class="card hidden" id="results-card" aria-labelledby="results-title">
+        <h2 id="results-title">Результаты</h2>
+
+        <div class="stats-grid">
+          <div class="stat">
+            <span class="stat-label">BMR</span>
+            <span class="stat-value" id="bmr">—</span>
+            <span class="stat-unit">ккал</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">TDEE</span>
+            <span class="stat-value" id="tdee">—</span>
+            <span class="stat-unit">ккал</span>
+          </div>
+
+          <div class="stat highlight">
+            <span class="stat-label">Целевая калорийность</span>
+            <span class="stat-value" id="target-kcal">—</span>
+            <span class="stat-unit">ккал</span>
+          </div>
+  </div>
+        <div class="macros">
+          <div class="macro">
+            <span class="macro-name">Белки</span>
+            <span class="macro-grams"><span id="protein">—</span> г</span>
+          </div>
+          <div class="macro">
+            <span class="macro-name">Жиры</span>
+            <span class="macro-grams"><span id="fat">—</span> г</span>
+          </div>
+          <div class="macro">
+            <span class="macro-name">Углеводы</span>
+            <span class="macro-grams"><span id="carb">—</span> г</span>
+          </div>
+        </div>
+
+        <p class="chart-hint">Круговая диаграмма — доля калорий из БЖУ</p>
+        <div class="chart-box">
+        <div class="chart-stage">
+          <canvas id="macroChart"></canvas>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIT SMART — калории, БЖУ, тренировки, сон</title>
+  <!-- Chart.js подключим на этапе 2 -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 1. Шапка -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <h1 class="logo">FIT&nbsp;<span class="accent">SMART</span></h1>
+      <p class="tagline">калории, БЖУ, тренировки, сон</p>
+    </div>
+  </header>
+
+  <main class="container main-content">
+
+    <!-- Верхняя сетка: форма слева, результаты справа -->
+    <div class="top-grid">
+
+      <!-- 2. Профиль -->
+      <section class="card" id="profile-card" aria-labelledby="profile-title">
+        <h2 id="profile-title">Профиль</h2>
+
+        <form id="profile-form" autocomplete="off">
+          <fieldset class="radio-field">
+            <legend>Пол</legend>
+            <div class="radio-row">
+              <label class="radio">
+                <input type="radio" name="gender" value="male" checked>
+                <span>Мужской</span>
+              </label>
+              <label class="radio">
+                <input type="radio" name="gender" value="female">
+                <span>Женский</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="field-row">
+            <div class="field">
+              <label for="age">Возраст</label>
+              <input type="number" id="age" name="age" min="14" max="90" step="1" placeholder="лет" required>
+            </div>
+            <div class="field">
+              <label for="weight">Вес, кг</label>
+              <input type="number" id="weight" name="weight" min="30" max="300" step="0.1" placeholder="кг" required>
+            </div>
+            <div class="field">
+              <label for="height">Рост, см</label>
+              <input type="number" id="height" name="height" min="120" max="250" step="1" placeholder="см" required>
+            </div>
+          </div>
+
+          <div class="form-grid two">
+            <div class="field">
+              <label for="activity">Уровень активности</label>
+              <select id="activity" name="activity">
+                <option value="1.2">Минимум — 1.2</option>
+                <option value="1.375">Лёгкая — 1.375</option>
+                <option value="1.55" selected>Средняя — 1.55</option>
+                <option value="1.725">Высокая — 1.725</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="goal">Цель</label>
+              <select id="goal" name="goal">
+                <option value="gain">Набор массы</option>
+                <option value="cut">Сушка</option>
+                <option value="maintain" selected>Поддержание</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-full" id="calc-btn">Рассчитать</button>
+        </form>
+      </section>
+
+      <!-- 3. Результаты (скрыт до расчёта) -->
+      <section class="card hidden" id="results-card" aria-labelledby="results-title">
+        <h2 id="results-title">Результаты</h2>
+
+        <div class="stats-grid">
+          <div class="stat">
+            <span class="stat-label">BMR</span>
+            <span class="stat-value" id="bmr">—</span>
+            <span class="stat-unit">ккал</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">TDEE</span>
+            <span class="stat-value" id="tdee">—</span>
+            <span class="stat-unit">ккал</span>
+          </div>
+          <div class="stat highlight">
+            <span class="stat-label">Целевая калорийность</span>
+            <span class="stat-value" id="target-kcal">—</span>
+            <span class="stat-unit">ккал</span>
+          </div>
+        </div>
+
+        <div class="macros">
+          <div class="macro">
+            <span class="macro-name">Белки</span>
+            <span class="macro-grams"><span id="protein">—</span> г</span>
+          </div>
+          <div class="macro">
+            <span class="macro-name">Жиры</span>
+            <span class="macro-grams"><span id="fat">—</span> г</span>
+          </div>
+          <div class="macro">
+            <span class="macro-name">Углеводы</span>
+            <span class="macro-grams"><span id="carb">—</span> г</span>
+          </div>
+        </div>
+
+        <p class="chart-hint">Круговая диаграмма — доля калорий из БЖУ</p>
+        <div class="chart-box">
+        <div class="chart-stage">
+          <canvas id="macroChart"></canvas>
+        </div>
+        </div>
+
+        <div class="warning hidden" id="carb-warning" role="alert">
+          <span class="warning-icon" aria-hidden="true">⚠</span>
+          <span>Углеводов меньше 100 г в день — такой план может быть тяжёлым. Проверьте цель и распределение БЖУ.</span>
+        </div>
+      </section>
+
+    </div>
+
+    <div class="stack">
+
+      <!-- 4. Тренировка -->
+      <section class="card" id="workout-card" aria-labelledby="workout-title">
+        <h2 id="workout-title">Тренировка</h2>
+
+        <form id="workout-form" autocomplete="off">
+          <div class="form-grid three">
+            <div class="field wide">
+              <label for="exercise">Упражнение</label>
+              <select id="exercise" name="exercise">
+                <optgroup label="Грудь">
+                  <option>Жим штанги лёжа</option>
+                  <option>Жим штанги лёжа на наклонной</option>
+                  <option>Жим штанги на обратной наклонной</option>
+                  <option>Жим гантелей лёжа</option>
+                  <option>Жим гантелей на наклонной</option>
+                  <option>Жим в тренажёре (Хаммер)</option>
+                  <option>Разведение гантелей лёжа</option>
+                  <option>Сведение в кроссовере</option>
+                  <option>Сведение в тренажёре «бабочка»</option>
+                  <option>Отжимания от пола</option>
+                  <option>Отжимания на брусьях</option>
+                  <option>Пуловер с гантелью</option>
+                </optgroup>
+                <optgroup label="Спина">
+                  <option>Подтягивания</option>
+                  <option>Подтягивания обратным хватом</option>
+                  <option>Тяга верхнего блока к груди</option>
+                  <option>Тяга верхнего блока за голову</option>
+                  <option>Тяга нижнего блока (гребная)</option>
+                  <option>Тяга штанги в наклоне</option>
+                  <option>Тяга гантелей в наклоне</option>
+                  <option>Тяга Т-грифа</option>
+                  <option>Тяга в Хаммере сидя</option>
+                  <option>Становая тяга (классика)</option>
+                  <option>Становая тяга сумо</option>
+                  <option>Шраги с гантелями</option>
+                  <option>Шраги со штангой</option>
+                  <option>Гиперэкстензия</option>
+                </optgroup>
+                <optgroup label="Ноги">
+                  <option>Приседания со штангой</option>
+                  <option>Приседания сумо</option>
+                  <option>Приседания в машине Смита</option>
+                  <option>Приседания с гантелями</option>
+                  <option>Жим ногами в тренажёре</option>
+                  <option>Гакк-присед</option>
+                  <option>Выпады со штангой</option>
+                  <option>Выпады с гантелями</option>
+                  <option>Болгарские сплит-приседания</option>
+                  <option>Румынская тяга со штангой</option>
+                  <option>Румынская тяга с гантелями</option>
+                  <option>Сгибание ног лёжа в тренажёре</option>
+                  <option>Разгибание ног сидя в тренажёре</option>
+                  <option>Подъём на носки стоя</option>
+                  <option>Подъём на носки сидя</option>
+                </optgroup>
+                <optgroup label="Плечи">
+                  <option>Жим штанги стоя (армейский)</option>
+                  <option>Жим штанги сидя</option>
+                  <option>Жим штанги из-за головы</option>
+                  <option>Жим гантелей сидя</option>
+                  <option>Жим Арнольда</option>
+                  <option>Махи гантелями в стороны</option>
+                  <option>Махи гантелями перед собой</option>
+                  <option>Махи в наклоне</option>
+                  <option>Махи в кроссовере в наклоне</option>
+                  <option>Тяга штанги к подбородку</option>
+                  <option>Тяга каната к лицу (face pull)</option>
+                </optgroup>
+                <optgroup label="Руки — бицепс">
+                  <option>Подъём штанги на бицепс</option>
+                  <option>Подъём гантелей на бицепс сидя</option>
+                  <option>Молотковый подъём гантелей</option>
+                  <option>Подъём на бицепс на скамье Скотта</option>
+                  <option>Концентрированный подъём</option>
+                  <option>Сгибание рук на нижнем блоке</option>
+                </optgroup>
+                <optgroup label="Руки — трицепс">
+                  <option>Французский жим лёжа</option>
+                  <option>Французский жим сидя</option>
+                  <option>Жим штанги узким хватом</option>
+                  <option>Разгибание на верхнем блоке</option>
+                  <option>Разгибание из-за головы с гантелью</option>
+                  <option>Разгибание руки в наклоне с гантелью</option>
+                  <option>Отжимания на брусьях (трицепс)</option>
+                </optgroup>
+                <optgroup label="Кор (пресс)">
+                  <option>Скручивания лёжа</option>
+                  <option>Подъём туловища на наклонной скамье</option>
+                  <option>Подъём ног в висе</option>
+                  <option>Скручивания на верхнем блоке</option>
+                  <option>Русские скручивания</option>
+                  <option>Велосипед</option>
+                  <option>V-образные скручивания</option>
+                  <option>Планка</option>
+                  <option>Боковая планка</option>
+                </optgroup>
+              </select>
+              <p class="hint">Список сгруппирован по группам мышц — раскрой и найди нужное упражнение.</p>
+            </div>
+
+            <div class="field">
+              <label for="sets">Подходы</label>
+              <input type="number" id="sets" name="sets" min="1" max="20" step="1" placeholder="3" required>
+            </div>
+            <div class="field">
+              <label for="reps">Повторения</label>
+              <input type="number" id="reps" name="reps" min="1" max="50" step="1" placeholder="8" required>
+            </div>
+            <div class="field">
+              <label for="bar-weight">Вес снаряда, кг</label>
+              <input type="number" id="bar-weight" name="bar-weight" min="0" max="500" step="0.5" placeholder="кг" required>
+            </div>
+
+            <button type="button" class="btn wide" id="add-exercise">Добавить упражнение</button>
+          </div>
+        </form>
+
+        <div class="table-wrap">
+          <table id="workout-table">
+            <thead>
+              <tr>
+                <th>Упражнение</th>
+                <th class="num">Подходы</th>
+                <th class="num">Повторения</th>
+                <th class="num">Вес, кг</th>
+                <th class="num">Тоннаж, кг</th>
+                <th class="del-col" aria-label="Удалить"></th>
+              </tr>
+            </thead>
+            <tbody id="workout-body">
+              <tr class="empty">
+                <td colspan="6">Пока пусто — добавьте первое упражнение</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colspan="5">Итоговый тоннаж за тренировку</td>
+                <td class="num tonnage-total" id="total-tonnage">0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      <!-- 5. Питание (FatSecret) -->
+      <section class="card" id="food-card" aria-labelledby="food-title">
+        <h2 id="food-title">Питание (FatSecret)</h2>
+
+        <div class="field">
+          <label for="csv-file">Загрузить CSV из FatSecret</label>
+          <input type="file" id="csv-file" name="csv-file" accept=".csv">
+        </div>
+
+        <div class="table-placeholder" id="nutrition-table">
+          Таблица «съел / цель / разница» появится после загрузки CSV (этап 2)
+        </div>
+      </section>
+
+      <!-- 6. Сон -->
+      <section class="card" id="sleep-card" aria-labelledby="sleep-title">
+        <h2 id="sleep-title">Сон</h2>
+
+        <div class="form-grid three">
+          <div class="field">
+            <label for="sleep-start">Время засыпания</label>
+            <input type="time" id="sleep-start" name="sleep-start">
+          </div>
+          <div class="field">
+            <label for="sleep-end">Время пробуждения</label>
+            <input type="time" id="sleep-end" name="sleep-end">
+          </div>
+          <div class="field">
+            <label for="sleep-duration">Длительность сна</label>
+            <input type="text" id="sleep-duration" name="sleep-duration" readonly placeholder="—">
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- 7. Подвал -->
+  <footer class="site-footer">
+    <div class="container">
+      <p>Локальный проект. Данные хранятся в localStorage.</p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+            </html>
