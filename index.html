@@ -34,7 +34,7 @@
 
       <!-- 2. Профиль -->
       <section class="card" id="profile-card" aria-labelledby="profile-title">
-        <h2 id="profile-title">Профиль</h2>
+        <h2 id="profile-title">Профиль 👤</h2>
 
         <form id="profile-form" autocomplete="off">
           <fieldset class="radio-field">
@@ -92,7 +92,7 @@
 
       <!-- 3. Результаты (скрыт до расчёта) -->
       <section class="card hidden" id="results-card" aria-labelledby="results-title">
-        <h2 id="results-title">Результаты</h2>
+        <h2 id="results-title">Результаты 🎯</h2>
 
         <div class="stats-grid">
           <div class="stat">
@@ -146,7 +146,10 @@
 
       <!-- 4. Тренировка -->
       <section class="card" id="workout-card" aria-labelledby="workout-title">
-        <h2 id="workout-title">Тренировка</h2>
+        <h2 id="workout-title">Тренировка 🏋️</h2>
+
+        <!-- Живой статус текущей тренировки -->
+        <div class="workout-status hidden" id="workout-status" aria-live="polite"></div>
 
         <form id="workout-form" autocomplete="off">
           <div class="form-grid three">
@@ -287,11 +290,24 @@
             </tfoot>
           </table>
         </div>
+
+        <div class="workout-actions">
+          <button type="button" class="btn btn-finish hidden" id="finish-workout">✅ Завершить тренировку</button>
+        </div>
+      </section>
+
+      <!-- 4b. История тренировок (скрыта, пока пусто) -->
+      <section class="card hidden" id="history-card" aria-labelledby="history-title">
+        <h2 id="history-title">История тренировок 📅</h2>
+        <div class="history-list" id="history-list"></div>
+        <div class="hist-actions">
+          <button type="button" class="btn-mini" id="history-clear">Очистить всю историю</button>
+        </div>
       </section>
 
       <!-- 5. Питание (FatSecret) -->
       <section class="card" id="food-card" aria-labelledby="food-title">
-        <h2 id="food-title">Питание (FatSecret)</h2>
+        <h2 id="food-title">Питание 🍽️</h2>
 
         <div class="seg" role="tablist" aria-label="Способ ввода питания за день">
           <button type="button" class="seg-btn active" role="tab" aria-selected="true" data-panel="manual">Итоги вручную</button>
@@ -411,7 +427,7 @@
 
       <!-- 6. Сон -->
       <section class="card" id="sleep-card" aria-labelledby="sleep-title">
-        <h2 id="sleep-title">Сон</h2>
+        <h2 id="sleep-title">Сон 😴</h2>
 
         <div class="form-grid three">
           <div class="field">
