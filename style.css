@@ -53,14 +53,25 @@ body {
 
 .hidden { display: none !important; }
 
-.accent { color: var(--accent); }
+.accent {
+  background: linear-gradient(90deg, #ff6b00, #ffb020);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
 
 /* ---------- Шапка ---------- */
 
 .site-header {
-  padding: 24px 0 18px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 14px 0 12px;
   border-bottom: 1px solid var(--border);
-  background: linear-gradient(180deg, #141414, var(--bg));
+  background: linear-gradient(180deg, rgba(20, 20, 20, .95), rgba(13, 13, 13, .88));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .header-inner {
@@ -265,15 +276,15 @@ input[readonly] {
   font-weight: 800;
   letter-spacing: .4px;
   color: #140f08;
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
   box-shadow: 0 6px 18px rgba(255, 107, 0, .25);
-  transition: background-color .15s ease, box-shadow .15s ease, transform .08s ease;
+  transition: filter .15s ease, box-shadow .15s ease, transform .08s ease;
 }
 
-.btn:hover { background: var(--accent-hover); }
+.btn:hover { filter: brightness(1.1); }
 
 .btn:active {
   transform: translateY(1px);
@@ -800,3 +811,155 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 }
 
 .hint a { color: var(--warn-text); }
+
+/* ==========================================================
+   Улучшения: статус тренировки, кнопка «Завершить», история
+   ========================================================== */
+
+/* ---------- Живой статус текущей тренировки ---------- */
+
+.workout-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: .8rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+
+.chip-accent {
+  color: var(--accent);
+  background: rgba(255, 107, 0, .08);
+  border-color: rgba(255, 107, 0, .4);
+}
+
+/* ---------- Кнопка «Завершить тренировку» ---------- */
+
+.workout-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.btn.btn-finish {
+  width: 100%;
+  color: #14210a;
+  background: linear-gradient(135deg, #a3e635, #7cc922);
+  box-shadow: 0 6px 18px rgba(163, 230, 53, .22);
+}
+
+.btn.btn-finish:hover {
+  background: linear-gradient(135deg, #b1ef4d, #8ad42c);
+  box-shadow: 0 8px 22px rgba(163, 230, 53, .3);
+}
+
+.btn.btn-finish:active {
+  box-shadow: 0 4px 12px rgba(163, 230, 53, .2);
+}
+
+.btn.btn-finish:focus-visible {
+  outline-color: #a3e635;
+}
+
+/* ---------- История тренировок ---------- */
+
+.history-list {
+  display: grid;
+  gap: 10px;
+}
+
+.hist-item {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  transition: border-color .15s ease;
+}
+
+.hist-item.open { border-color: rgba(255, 107, 0, .45); }
+
+.hist-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  width: 100%;
+  padding: 12px 14px;
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.hist-head:hover { background: rgba(255, 255, 255, .03); }
+
+.hist-head:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.hist-date {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hist-date b { font-size: .95rem; }
+
+.hist-date small {
+  color: var(--muted);
+  font-size: .76rem;
+}
+
+.hist-meta {
+  flex: none;
+  color: var(--muted);
+  font-size: .85rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.hist-meta b { color: var(--accent); }
+
+.hist-chevron {
+  flex: none;
+  color: var(--muted);
+  transition: transform .2s ease;
+}
+
+.hist-item.open .hist-chevron { transform: rotate(180deg); }
+
+.hist-body { padding: 0 10px 12px; }
+
+.hist-body .table-wrap { margin-top: 0; }
+
+.hist-table table { min-width: 420px; }
+
+.hist-body .btn-mini { margin-top: 10px; }
+
+.hist-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+/* ---------- Мелкая полировка таблиц ---------- */
+
+.table-wrap tbody tr:nth-child(even) { background: rgba(255, 255, 255, .015); }
