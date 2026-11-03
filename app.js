@@ -33,7 +33,7 @@
     return Number.isInteger(n) ? String(n) : String(n);
   };
 
-  const KEYS = { profile: 'fit_profile', workout: 'fit_workout', sleep: 'fit_sleep', nutrition: 'fit_nutrition' };
+  const KEYS = { profile: 'fit_profile', workout: 'fit_workout', sleep: 'fit_sleep', nutrition: 'fit_nutrition', history: 'fit_history' };
 
   const load = (key, dflt) => {
     try {
@@ -176,19 +176,79 @@
       </div>`;
   }
 
-  /* ================= 2. Тренировка и тоннаж ================= */
+  /* ================= 2. Тренировка, тоннаж и история ================= */
 
   const workoutForm = $('workout-form');
   const workoutBody = $('workout-body');
   const totalCell = $('total-tonnage');
+  const workoutStatus = $('workout-status');
+  const finishBtn = $('finish-workout');
+  const historyCard = $('history-card');
+  const historyList = $('history-list');
+  const historyClearBtn = $('history-clear');
 
   let workoutRows = load(KEYS.workout, []);
   if (!Array.isArray(workoutRows)) workoutRows = [];
 
+  // История завершённых тренировок (новые сверху)
+  let history = load(KEYS.history, []);
+  if (!Array.isArray(history)) history = [];
+
+  // Метаданные текущей тренировки (время старта)
+  const META_KEY = 'fit_workout_meta';
+  let workoutMeta = load(META_KEY, {}) || {};
+  if (typeof workoutMeta.startedAt !== 'number') workoutMeta.startedAt = null;
+
   const tonnageOf = (r) => r.sets * r.reps * r.weight;
+
+  // Русские склонения: plural(5, 'упражнение', 'упражнения', 'упражнений')
+  const plural = (n, one, few, many) => {
+    const m10 = n % 10, m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return one;
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return few;
+    return many;
+  };
+
+  const durText = (min) =>
+    min < 60 ? min + ' мин' : Math.floor(min / 60) + ' ч ' + (min % 60) + ' мин';
+
+  // Длительность текущей тренировки (мин) или null, если старт не зафиксирован
+  function workoutDurationMin() {
+    if (!workoutMeta.startedAt) return null;
+    // ограничение 12 ч — защита от «забытой» тренировки
+    return Math.min(12 * 60, Math.max(0, Math.round((Date.now() - workoutMeta.startedAt) / 60000)));
+  }
 
   function renderWorkout() {
     store(KEYS.workout, workoutRows);
+
+    const active = workoutRows.length > 0;
+
+    // авто-старт: время начала фиксируем при первом упражнении
+    if (active && !workoutMeta.startedAt) {
+      workoutMeta.startedAt = Date.now();
+      store(META_KEY, workoutMeta);
+    }
+    if (!active && workoutMeta.startedAt) {
+      workoutMeta.startedAt = null;
+      store(META_KEY, workoutMeta);
+    }
+
+    finishBtn.classList.toggle('hidden', !active);
+
+    // живой статус тренировки
+    if (active) {
+      const total = workoutRows.reduce((s, r) => s + tonnageOf(r), 0);
+      const d = workoutDurationMin();
+      workoutStatus.innerHTML =
+        '<span class="chip">⏱ ' + (d == null ? '—' : durText(d)) + '</span>' +
+        '<span class="chip">' + workoutRows.length + ' ' +
+        plural(workoutRows.length, 'упражнение', 'упражнения', 'упражнений') + '</span>' +
+        '<span class="chip chip-accent">Тоннаж: ' + fmt(total) + ' кг</span>';
+      workoutStatus.classList.remove('hidden');
+    } else {
+      workoutStatus.classList.add('hidden');
+    }
 
     if (!workoutRows.length) {
       workoutBody.innerHTML = '<tr class="empty"><td colspan="6">Пока пусто — добавьте первое упражнение</td></tr>';
@@ -212,6 +272,110 @@
     const total = workoutRows.reduce((s, r) => s + tonnageOf(r), 0);
     totalCell.textContent = fmt(total);
   }
+
+  // Завершение тренировки: сохранить в историю и начать новую
+  finishBtn.addEventListener('click', () => {
+    if (!workoutRows.length) return;
+    const total = workoutRows.reduce((s, r) => s + tonnageOf(r), 0);
+    const now = new Date();
+    history.unshift({
+      id: Date.now(),
+      date: now.toISOString(),
+      durationMin: workoutDurationMin(),
+      tonnage: total,
+      exercises: workoutRows,
+    });
+    store(KEYS.history, history);
+
+    workoutRows = [];
+    workoutMeta.startedAt = null;
+    store(META_KEY, workoutMeta);
+
+    renderWorkout();
+    renderHistory();
+
+    historyCard.classList.remove('hidden');
+    historyCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  function renderHistory() {
+    historyClearBtn.classList.toggle('hidden', !history.length);
+
+    if (!history.length) {
+      historyList.innerHTML = '';
+      historyCard.classList.add('hidden');
+      return;
+    }
+
+    historyList.innerHTML = history.map((w) => {
+      const d = new Date(w.date);
+      const exs = Array.isArray(w.exercises) ? w.exercises : [];
+      const year = d.getFullYear() !== new Date().getFullYear() ? ' ' + d.getFullYear() : '';
+      const day = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) + year;
+      const wd = d.toLocaleDateString('ru-RU', { weekday: 'long' });
+      const time = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      const dur = w.durationMin != null ? ' • ⏱ ' + durText(w.durationMin) : '';
+      const rows = exs.map((r) => `
+            <tr>
+              <td>${esc(r.exercise)}</td>
+              <td class="num">${r.sets}</td>
+              <td class="num">${r.reps}</td>
+              <td class="num">${fmt(r.weight)}</td>
+              <td class="num">${fmt(tonnageOf(r))}</td>
+            </tr>`).join('');
+      return `
+        <div class="hist-item" data-id="${w.id}">
+          <button type="button" class="hist-head" aria-expanded="false">
+            <span class="hist-date"><b>${day}</b><small>${wd}, ${time}${dur}</small></span>
+            <span class="hist-meta">${exs.length} ${plural(exs.length, 'упражнение', 'упражнения', 'упражнений')} • <b>${fmt(w.tonnage)} кг</b></span>
+            <span class="hist-chevron" aria-hidden="true">▾</span>
+          </button>
+          <div class="hist-body hidden">
+            <div class="table-wrap hist-table">
+              <table>
+                <thead><tr><th>Упражнение</th><th class="num">Подходы</th><th class="num">Повторы</th><th class="num">Вес, кг</th><th class="num">Тоннаж</th></tr></thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+            <button type="button" class="btn-mini hist-del" data-id="${w.id}">Удалить запись</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    historyCard.classList.remove('hidden');
+  }
+
+  // делегирование: раскрытие записи / удаление одной записи
+  historyList.addEventListener('click', (e) => {
+    const del = e.target.closest('.hist-del');
+    if (del) {
+      if (!confirm('Удалить эту тренировку из истории?')) return;
+      history = history.filter((w) => String(w.id) !== del.dataset.id);
+      store(KEYS.history, history);
+      renderHistory();
+      return;
+    }
+    const head = e.target.closest('.hist-head');
+    if (!head) return;
+    const item = head.closest('.hist-item');
+    const body = item.querySelector('.hist-body');
+    const nowHidden = body.classList.toggle('hidden');
+    head.setAttribute('aria-expanded', nowHidden ? 'false' : 'true');
+    item.classList.toggle('open', !nowHidden);
+  });
+
+  historyClearBtn.addEventListener('click', () => {
+    if (!history.length) return;
+    if (!confirm('Удалить всю историю тренировок?')) return;
+    history = [];
+    store(KEYS.history, history);
+    renderHistory();
+  });
+
+  // живой таймер: обновляем статус текущей тренировки раз в 30 секунд
+  setInterval(() => {
+    if (workoutRows.length && workoutMeta.startedAt) renderWorkout();
+  }, 30000);
 
   $('add-exercise').addEventListener('click', () => {
     if (!workoutForm.reportValidity()) return;
@@ -896,6 +1060,7 @@
 
     initFoodUI();
     renderWorkout();
+    renderHistory();
   }
 
   $('calc-btn').addEventListener('click', calculate);
