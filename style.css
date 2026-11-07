@@ -874,6 +874,28 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   outline-color: #a3e635;
 }
 
+/* ---------- График прогресса ---------- */
+
+.chart-wrap {
+  margin: 4px 0 16px;
+  padding: 12px 12px 8px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.chart-title {
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.chart-box {
+  position: relative;
+  height: 220px;
+}
+
 /* ---------- История тренировок ---------- */
 
 .history-list {
