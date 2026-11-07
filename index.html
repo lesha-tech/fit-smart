@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FIT SMART — калории, БЖУ, тренировки, сон</title>
-  <!-- Chart.js подключим на этапе 2 -->
+  <!-- Chart.js для графика прогресса (графическая библиотека с CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="style.css">
 
   <!-- PWA: установка на смартфон как приложение -->
@@ -299,6 +300,13 @@
       <!-- 4b. История тренировок (скрыта, пока пусто) -->
       <section class="card hidden" id="history-card" aria-labelledby="history-title">
         <h2 id="history-title">История тренировок 📅</h2>
+
+        <!-- График прогресса: тоннаж по последним 12 тренировкам -->
+        <div class="chart-wrap hidden" id="chart-wrap">
+          <div class="chart-title">📈 Прогресс: тоннаж по тренировкам</div>
+          <div class="chart-box"><canvas id="progress-chart" aria-hidden="true"></canvas></div>
+        </div>
+
         <div class="history-list" id="history-list"></div>
         <div class="hist-actions">
           <button type="button" class="btn-mini" id="history-clear">Очистить всю историю</button>
