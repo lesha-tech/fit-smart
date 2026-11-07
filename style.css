@@ -845,6 +845,37 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   border-color: rgba(255, 107, 0, .4);
 }
 
+/* ---------- Память пользователя (профиль) ---------- */
+
+.profile-saved {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+}
+
+.profile-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-note {
+  margin: 0;
+  font-size: .78rem;
+  color: var(--muted);
+}
+
+.profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 /* ---------- Кнопка «Завершить тренировку» ---------- */
 
 .workout-actions {
