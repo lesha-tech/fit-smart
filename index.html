@@ -164,6 +164,9 @@
         <!-- Живой статус текущей тренировки -->
         <div class="workout-status hidden" id="workout-status" aria-live="polite"></div>
 
+        <!-- Календарь недели: ✅ — день с завершённой тренировкой -->
+        <div class="week-strip" id="week-strip" aria-label="Календарь недели"></div>
+
         <form id="workout-form" autocomplete="off">
           <div class="form-grid three">
             <div class="field wide">
@@ -306,6 +309,7 @@
 
         <div class="workout-actions">
           <button type="button" class="btn btn-finish hidden" id="finish-workout">✅ Завершить тренировку</button>
+          <button type="button" class="btn btn-share hidden" id="share-workout">📤 Поделиться результатом</button>
         </div>
       </section>
 
@@ -317,6 +321,12 @@
         <div class="chart-wrap hidden" id="chart-wrap">
           <div class="chart-title">📈 Прогресс: тоннаж по тренировкам</div>
           <div class="chart-box"><canvas id="progress-chart" aria-hidden="true"></canvas></div>
+        </div>
+
+        <!-- Итоги недели: тоннаж по группам мышц за 7 дней -->
+        <div class="week-summary hidden" id="week-summary">
+          <div class="chart-title">🗓 Итоги недели — что прокачал, а что забросил</div>
+          <div class="week-chips" id="week-chips"></div>
         </div>
 
         <div class="history-list" id="history-list"></div>
