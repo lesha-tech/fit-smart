@@ -304,6 +304,7 @@
     if (!history.length) {
       historyList.innerHTML = '';
       historyCard.classList.add('hidden');
+      hideProgressChart();
       return;
     }
 
@@ -343,6 +344,7 @@
     }).join('');
 
     historyCard.classList.remove('hidden');
+    renderProgressChart();
   }
 
   // делегирование: раскрытие записи / удаление одной записи
@@ -371,6 +373,92 @@
     store(KEYS.history, history);
     renderHistory();
   });
+
+  /* ---------- График прогресса (Chart.js, последние 12 тренировок) ---------- */
+
+  let progressChart = null;
+
+  function hideProgressChart() {
+    $('chart-wrap').classList.add('hidden');
+    if (progressChart) {
+      progressChart.destroy();
+      progressChart = null;
+    }
+  }
+
+  function renderProgressChart() {
+    const wrap = $('chart-wrap');
+    // CDN недоступен (офлайн) — просто прячем график, приложение работает дальше
+    if (typeof Chart === 'undefined') {
+      wrap.classList.add('hidden');
+      return;
+    }
+    if (history.length < 2) {
+      wrap.classList.add('hidden');
+      return; // для графика нужно минимум 2 точки
+    }
+
+    // последние 12 тренировок в хронологическом порядке (старые слева)
+    const items = history.slice(0, 12).reverse();
+    const labels = items.map((w) =>
+      new Date(w.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }));
+    const values = items.map((w) => w.tonnage);
+
+    if (progressChart) {
+      progressChart.destroy();
+      progressChart = null;
+    }
+
+    progressChart = new Chart($('progress-chart'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Тоннаж, кг',
+          data: values,
+          borderColor: '#ff6b00',
+          backgroundColor: 'rgba(255, 107, 0, .12)',
+          fill: true,
+          tension: .35,
+          borderWidth: 2.5,
+          pointRadius: 3.5,
+          pointBackgroundColor: '#ff6b00',
+          pointBorderColor: '#0d0d0d',
+          pointBorderWidth: 2,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1e1e1e',
+            borderColor: '#3d3d3d',
+            borderWidth: 1,
+            titleColor: '#f2f2f2',
+            bodyColor: '#f2f2f2',
+            padding: 10,
+            callbacks: {
+              label: (ctx) => ' ' + fmt(ctx.parsed.y) + ' кг',
+            },
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, .05)' },
+            ticks: { color: '#9b9b9b', maxRotation: 0, autoSkipPadding: 12 },
+          },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, .05)' },
+            ticks: { color: '#9b9b9b', callback: (v) => (v >= 1000 ? (v / 1000) + ' т' : v + ' кг') },
+          },
+        },
+      },
+    });
+
+    wrap.classList.remove('hidden');
+  }
 
   // живой таймер: обновляем статус текущей тренировки раз в 30 секунд
   setInterval(() => {
