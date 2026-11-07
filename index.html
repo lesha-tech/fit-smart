@@ -37,7 +37,18 @@
       <section class="card" id="profile-card" aria-labelledby="profile-title">
         <h2 id="profile-title">Профиль 👤</h2>
 
-        <form id="profile-form" autocomplete="off">
+        <!-- Память пользователя: сводка сохранённого профиля (форма скрыта) -->
+        <div class="profile-saved hidden" id="profile-saved" aria-live="polite">
+          <div class="profile-chips" id="profile-chips"></div>
+          <p class="profile-note">💾 Память пользователя: параметры сохранены в этом браузере и восстановятся при входе</p>
+          <div class="profile-actions">
+            <button type="button" class="btn-mini" id="edit-profile">✏️ Изменить</button>
+            <button type="button" class="btn-mini" id="reset-profile">🗑 Сбросить</button>
+          </div>
+        </div>
+
+        <div id="profile-form-wrap">
+          <form id="profile-form" autocomplete="off">
           <fieldset class="radio-field">
             <legend>Пол</legend>
             <div class="radio-row">
@@ -89,6 +100,7 @@
 
           <button type="button" class="btn btn-full" id="calc-btn">Рассчитать</button>
         </form>
+        </div>
       </section>
 
       <!-- 3. Результаты (скрыт до расчёта) -->
