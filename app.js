@@ -72,7 +72,7 @@
     return { gender, age, weight, height, activity, goal };
   }
 
-  function calculate() {
+  function calculate(scroll = true) {
     if (!profileForm.reportValidity()) return;
     const p = readProfile();
     if (!p) return;
@@ -104,9 +104,54 @@
     renderChart(protein, fat, carbs);
     lastResult = { target, protein, fat, carbs };
     store(KEYS.profile, { ...p, result: lastResult });
+    renderProfileSaved(p);
 
-    resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (scroll) resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
+
+  /* ---------- Память пользователя: сводка профиля ---------- */
+
+  const profileFormWrap = $('profile-form-wrap');
+  const profileSavedPanel = $('profile-saved');
+  const profileChips = $('profile-chips');
+
+  const ACTIVITY_LABELS = { 1.2: 'Минимум', 1.375: 'Лёгкая', 1.55: 'Средняя', 1.725: 'Высокая' };
+  const GOAL_LABELS = { gain: 'Набор массы', cut: 'Сушка', maintain: 'Поддержание' };
+
+  // Есть сохранённый профиль → показываем сводку, форма скрыта.
+  // Нет профиля → показываем обычную форму.
+  function renderProfileSaved(p) {
+    if (!p) {
+      profileSavedPanel.classList.add('hidden');
+      profileFormWrap.classList.remove('hidden');
+      return;
+    }
+    const gender = p.gender === 'male' ? '♂ Мужской' : '♀ Женский';
+    const act = ACTIVITY_LABELS[p.activity] || ('× ' + p.activity);
+    profileChips.innerHTML =
+      '<span class="chip">' + gender + '</span>' +
+      '<span class="chip">' + p.age + ' ' + plural(p.age, 'год', 'года', 'лет') + '</span>' +
+      '<span class="chip">' + fmt(p.height) + ' см</span>' +
+      '<span class="chip">' + fmt(p.weight) + ' кг</span>' +
+      '<span class="chip">Активность: ' + act + '</span>' +
+      '<span class="chip chip-accent">' + (GOAL_LABELS[p.goal] || p.goal) + '</span>';
+    profileSavedPanel.classList.remove('hidden');
+    profileFormWrap.classList.add('hidden');
+  }
+
+  $('edit-profile').addEventListener('click', () => {
+    renderProfileSaved(null); // показать поля (они уже заполнены сохранёнными значениями)
+    profileFormWrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  $('reset-profile').addEventListener('click', () => {
+    if (!confirm('Сбросить сохранённый профиль? Форма очистится до значений по умолчанию.')) return;
+    localStorage.removeItem(KEYS.profile);
+    lastResult = null;
+    resultsCard.classList.add('hidden');
+    profileForm.reset();
+    renderProfileSaved(null);
+  });
 
   /* ---------- Круговая диаграмма БЖУ ---------- */
 
@@ -1143,7 +1188,7 @@
       $('height').value = p.height;
       $('activity').value = p.activity;
       $('goal').value = p.goal;
-      calculate();
+      calculate(false); // восстановление без прокрутки
     }
 
     initFoodUI();
