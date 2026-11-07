@@ -227,7 +227,11 @@
   const workoutBody = $('workout-body');
   const totalCell = $('total-tonnage');
   const workoutStatus = $('workout-status');
+  const shareBtn = $('share-workout');
   const finishBtn = $('finish-workout');
+  const weekStrip = $('week-strip');
+  const weekSummary = $('week-summary');
+  const weekChips = $('week-chips');
   const historyCard = $('history-card');
   const historyList = $('history-list');
   const historyClearBtn = $('history-clear');
@@ -245,6 +249,48 @@
   if (typeof workoutMeta.startedAt !== 'number') workoutMeta.startedAt = null;
 
   const tonnageOf = (r) => r.sets * r.reps * r.weight;
+
+  /* ---------- Группы мышц ---------- */
+
+  // Цвета групп (шестизначный hex — для чипов и сводки недели).
+  // Ключи должны совпадать с <optgroup label="..."> в index.html
+  const GROUP_COLORS = {
+    'Грудь': '#ff6b00',
+    'Спина': '#4dabf7',
+    'Ноги': '#a3e635',
+    'Плечи': '#ffd43b',
+    'Руки — бицепс': '#e599f7',
+    'Руки — трицепс': '#f783ac',
+    'Кор (пресс)': '#66d9e8',
+  };
+
+  // имя упражнения → группа (строим из optgroup-разделов списка упражнений)
+  const EXERCISE_GROUPS = (() => {
+    const map = {};
+    const sel = $('exercise');
+    if (sel) {
+      Array.from(sel.options).forEach((o) => {
+        const og = o.closest('optgroup');
+        map[o.value] = og ? og.label : 'Другое';
+      });
+    }
+    return map;
+  })();
+
+  // группа строки: из данных либо из справочника (для старых записей)
+  const groupOfRow = (r) => r.group || EXERCISE_GROUPS[r.exercise] || 'Другое';
+
+  // #ff6b00 → rgba(255, 107, 0, a)
+  const hexRgba = (hex, a) => {
+    const n = hex.replace('#', '');
+    return 'rgba(' + parseInt(n.slice(0, 2), 16) + ', ' + parseInt(n.slice(2, 4), 16) + ', ' + parseInt(n.slice(4, 6), 16) + ', ' + a + ')';
+  };
+
+  // цветной чип группы мышц
+  const mgChip = (group) => {
+    const c = GROUP_COLORS[group] || '#9b9b9b';
+    return `<span class="mg" style="color:${c};background:${hexRgba(c, .13)};border-color:${hexRgba(c, .38)}">${esc(group)}</span>`;
+  };
 
   // Русские склонения: plural(5, 'упражнение', 'упражнения', 'упражнений')
   const plural = (n, one, few, many) => {
@@ -280,6 +326,7 @@
     }
 
     finishBtn.classList.toggle('hidden', !active);
+    shareBtn.classList.toggle('hidden', !active);
 
     // живой статус тренировки
     if (active) {
@@ -303,7 +350,7 @@
 
     workoutBody.innerHTML = workoutRows.map((r, i) => `
       <tr>
-        <td>${esc(r.exercise)}</td>
+        <td>${esc(r.exercise)}${mgChip(groupOfRow(r))}</td>
         <td class="num">${r.sets}</td>
         <td class="num">${r.reps}</td>
         <td class="num">${fmt(r.weight)}</td>
@@ -345,10 +392,12 @@
 
   function renderHistory() {
     historyClearBtn.classList.toggle('hidden', !history.length);
+    renderWeekStrip();
 
     if (!history.length) {
       historyList.innerHTML = '';
       historyCard.classList.add('hidden');
+      weekSummary.classList.add('hidden');
       hideProgressChart();
       return;
     }
@@ -363,7 +412,7 @@
       const dur = w.durationMin != null ? ' • ⏱ ' + durText(w.durationMin) : '';
       const rows = exs.map((r) => `
             <tr>
-              <td>${esc(r.exercise)}</td>
+              <td>${esc(r.exercise)}${mgChip(groupOfRow(r))}</td>
               <td class="num">${r.sets}</td>
               <td class="num">${r.reps}</td>
               <td class="num">${fmt(r.weight)}</td>
@@ -390,6 +439,7 @@
 
     historyCard.classList.remove('hidden');
     renderProgressChart();
+    renderWeekSummary();
   }
 
   // делегирование: раскрытие записи / удаление одной записи
@@ -417,6 +467,92 @@
     history = [];
     store(KEYS.history, history);
     renderHistory();
+  });
+
+  /* ---------- Календарь недели (пн–вс) ---------- */
+
+  // Проставляем ✅ тем дням текущей недели, когда тренировка была завершена
+  function renderWeekStrip() {
+    const now = new Date();
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - (now.getDay() + 6) % 7); // начало недели — понедельник
+    monday.setHours(0, 0, 0, 0);
+
+    const doneDays = new Set(history.map((w) => new Date(w.date).toDateString()));
+    const today = now.toDateString();
+
+    weekStrip.innerHTML = Array.from({ length: 7 }, (_, i) => {
+      const day = new Date(monday);
+      day.setDate(monday.getDate() + i);
+      const isDone = doneDays.has(day.toDateString());
+      const isToday = day.toDateString() === today;
+      return '<div class="wd' + (isDone ? ' done' : '') + (isToday ? ' today' : '') + '" title="' +
+        day.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }) + '">' +
+        '<small>' + day.toLocaleDateString('ru-RU', { weekday: 'short' }) + '</small>' +
+        '<b>' + (isDone ? '✅' : '—') + '</b></div>';
+    }).join('');
+  }
+
+  /* ---------- Итоги недели: что прокачал, а что забросил ---------- */
+
+  function renderWeekSummary() {
+    const since = Date.now() - 7 * 86400000;
+    const perGroup = {};
+    history.forEach((w) => {
+      if (new Date(w.date).getTime() < since) return;
+      (Array.isArray(w.exercises) ? w.exercises : []).forEach((r) => {
+        const g = groupOfRow(r);
+        perGroup[g] = (perGroup[g] || 0) + tonnageOf(r);
+      });
+    });
+
+    // базовые группы всегда видны (чтобы было видно, кого «забросил»), прочие — при наличии
+    const groups = ['Грудь', 'Спина', 'Ноги', 'Плечи', 'Руки — бицепс', 'Руки — трицепс', 'Кор (пресс)']
+      .concat(Object.keys(perGroup).filter((g) => !(g in GROUP_COLORS)));
+
+    weekChips.innerHTML = groups.map((g) => {
+      const c = GROUP_COLORS[g] || '#9b9b9b';
+      const t = perGroup[g] || 0;
+      return `<span class="week-chip" style="color:${c};background:${hexRgba(c, t ? .13 : .05)};border-color:${hexRgba(c, t ? .38 : .2)}">` +
+        esc(g) + ' · ' + (t ? fmt(t) + ' кг' : 'отдых') + '</span>';
+    }).join('');
+
+    weekSummary.classList.remove('hidden');
+  }
+
+  /* ---------- Кнопка «Поделиться результатом» ---------- */
+
+  function buildShareText() {
+    const d = workoutDurationMin();
+    const total = workoutRows.reduce((s, r) => s + tonnageOf(r), 0);
+    const when = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
+    const lines = [
+      '🏋️ FIT SMART — тренировка ' + when,
+      '⏱ ' + (d == null ? '—' : durText(d)) +
+      ' • ' + workoutRows.length + ' ' + plural(workoutRows.length, 'упражнение', 'упражнения', 'упражнений') +
+      ' • 💪 Тоннаж: ' + fmt(total) + ' кг',
+      '',
+    ];
+    workoutRows.forEach((r) => {
+      lines.push('• ' + r.exercise + ' — ' + r.sets + '×' + r.reps + '×' + fmt(r.weight) + ' кг');
+    });
+    return lines.join('\n');
+  }
+
+  shareBtn.addEventListener('click', async () => {
+    const text = buildShareText();
+    // на телефоне — системное меню («поделиться» в WhatsApp/Telegram/Notes)
+    if (navigator.share) {
+      try { await navigator.share({ title: 'FIT SMART', text: text }); } catch (e) { /* отменили шаринг */ }
+      return;
+    }
+    // запасной вариант: в буфер обмена
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Текст тренировки скопирован в буфер:\n\n' + text);
+    } catch (e) {
+      prompt('Скопируйте текст тренировки:', text);
+    }
   });
 
   /* ---------- График прогресса (Chart.js, последние 12 тренировок) ---------- */
@@ -512,8 +648,12 @@
 
   $('add-exercise').addEventListener('click', () => {
     if (!workoutForm.reportValidity()) return;
+    const exerciseSelect = $('exercise');
+    const sel = exerciseSelect.selectedOptions[0];
+    const og = sel ? sel.closest('optgroup') : null;
     const row = {
-      exercise: $('exercise').value,
+      exercise: exerciseSelect.value,
+      group: og ? og.label : 'Другое',
       sets: parseInt($('sets').value, 10) || 0,
       reps: parseInt($('reps').value, 10) || 0,
       weight: num($('bar-weight').value),
@@ -1199,6 +1339,14 @@
   $('calc-btn').addEventListener('click', calculate);
 
   restore();
+
+  /* ================= 7. Service Worker: полный офлайн ================= */
+
+  // после установки кэширует «оболочку» приложения — сайт открывается без
+  // интернета и запускается быстрее. Без интернета данные остаются в localStorage.
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* приложение работает и без worker */ });
+  }
 })();
 
 /* ========== Мини-таблица для чисел с дробями ========== */
