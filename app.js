@@ -1,7 +1,7 @@
 // логика на этапе 2 — уже здесь
 
 /* ==========================================================
-   FIT SMART — вся логика приложения
+   ALEX FIT — вся логика приложения
    - Калькулятор BMR / TDEE / целевых ккал / БЖУ + круговая диаграмма
    - Тренировки: добавление упражнений и итоговый тоннаж
    - Сон: длительность по времени засыпания и пробуждения
@@ -527,7 +527,7 @@
     const total = workoutRows.reduce((s, r) => s + tonnageOf(r), 0);
     const when = new Date().toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' });
     const lines = [
-      '🏋️ FIT SMART — тренировка ' + when,
+      '🏋️ ALEX FIT — тренировка ' + when,
       '⏱ ' + (d == null ? '—' : durText(d)) +
       ' • ' + workoutRows.length + ' ' + plural(workoutRows.length, 'упражнение', 'упражнения', 'упражнений') +
       ' • 💪 Тоннаж: ' + fmt(total) + ' кг',
@@ -543,7 +543,7 @@
     const text = buildShareText();
     // на телефоне — системное меню («поделиться» в WhatsApp/Telegram/Notes)
     if (navigator.share) {
-      try { await navigator.share({ title: 'FIT SMART', text: text }); } catch (e) { /* отменили шаринг */ }
+      try { await navigator.share({ title: 'ALEX FIT', text: text }); } catch (e) { /* отменили шаринг */ }
       return;
     }
     // запасной вариант: в буфер обмена
