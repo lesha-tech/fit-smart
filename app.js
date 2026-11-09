@@ -73,6 +73,9 @@
   }
 
   function calculate(scroll = true) {
+    // см. комментарий в add-exercise: readonly-поля не валидируются формой
+    const emptyNum = ['age', 'weight', 'height'].map((id) => $(id)).find((el) => !el.value);
+    if (emptyNum) { openWheel(emptyNum); return; }
     if (!profileForm.reportValidity()) return;
     const p = readProfile();
     if (!p) return;
@@ -647,6 +650,9 @@
   }, 30000);
 
   $('add-exercise').addEventListener('click', () => {
+    // readonly-поля не проверяются формой → пустые числа ловим сами и открываем шторку
+    const emptyNum = ['sets', 'reps', 'bar-weight'].map((id) => $(id)).find((el) => !el.value);
+    if (emptyNum) { openWheel(emptyNum); return; }
     if (!workoutForm.reportValidity()) return;
     const exerciseSelect = $('exercise');
     const sel = exerciseSelect.selectedOptions[0];
@@ -1340,7 +1346,141 @@
 
   restore();
 
-  /* ================= 7. Service Worker: полный офлайн ================= */
+  /* ================= 7. Шторка-колёсико: выбор чисел прокруткой ================= */
+
+  // Числовые поля и их диапазоны: id → { min, max, step, unit, def }
+  const WHEEL_FIELDS = {
+    'sets':       { min: 1,   max: 20,   step: 1,   unit: '',     def: 3 },
+    'reps':       { min: 1,   max: 50,   step: 1,   unit: '',     def: 8 },
+    'bar-weight': { min: 0,   max: 300,  step: 0.5, unit: 'кг',   def: 40 },
+    'age':        { min: 14,  max: 90,   step: 1,   unit: 'лет',  def: 25 },
+    'weight':     { min: 35,  max: 250,  step: 0.5, unit: 'кг',   def: 70 },
+    'height':     { min: 120, max: 250,  step: 1,   unit: 'см',   def: 175 },
+    'fs-kcal':    { min: 0,   max: 3000, step: 5,   unit: 'ккал', def: 0 },
+    'fs-protein': { min: 0,   max: 300,  step: 1,   unit: 'г',    def: 0 },
+    'fs-fat':     { min: 0,   max: 300,  step: 1,   unit: 'г',    def: 0 },
+    'fs-carb':    { min: 0,   max: 400,  step: 1,   unit: 'г',    def: 0 },
+    'fs-qty':     { min: 0.1, max: 30,   step: 0.1, unit: '',     def: 1 },
+  };
+
+  const ITEM_H = 44; // высота одной строки колёсика (синхронизировано с CSS)
+
+  const pickerOverlay = $('picker-overlay');
+  const pickerSheet = $('picker-sheet');
+  const pickerList = $('picker-list');
+  const pickerWheel = $('picker-wheel');
+  const pickerTitle = $('picker-title');
+  const pickerCurrent = $('picker-current');
+  const pickerUnit = $('picker-unit');
+  const pickerDone = $('picker-done');
+
+  let pickerInput = null;
+  let pickerConfig = null;
+  let pickerOpened = false;
+  let pickerTick = 0;
+
+  // 72.50000001 → «72.5»
+  const wheelFmt = (v) => String(Math.round(v * 100) / 100);
+
+  function openWheel(input) {
+    const cfg = WHEEL_FIELDS[input.id];
+    if (!cfg || pickerOpened) return;
+    pickerInput = input;
+    pickerConfig = cfg;
+
+    // список значений от min до max с шагом
+    const items = [];
+    for (let v = cfg.min; v <= cfg.max + 1e-9; v += cfg.step) items.push(Math.round(v * 100) / 100);
+
+    pickerList.innerHTML = items.map((v) => `<li style="height:${ITEM_H}px">${wheelFmt(v)}</li>`).join('');
+
+    // старт: текущее значение поля, иначе «разумное» по умолчанию
+    let start = num(input.value) || (cfg.def != null ? cfg.def : cfg.min);
+    start = Math.min(cfg.max, Math.max(cfg.min, start));
+    const idx = Math.min(items.length - 1, Math.max(0, Math.round((start - cfg.min) / cfg.step)));
+
+    // заголовок — текст label рядом с полем
+    const label = input.closest('.field') ? input.closest('.field').querySelector('label') : null;
+    pickerTitle.textContent = label ? label.textContent : 'Выбери число';
+    pickerUnit.textContent = cfg.unit;
+    pickerCurrent.textContent = wheelFmt(items[idx]);
+
+    pickerOpened = true;
+    document.body.style.overflow = 'hidden'; // фон не прокручивается под шторкой
+    pickerOverlay.hidden = false;
+    pickerSheet.hidden = false;
+    pickerOverlay.classList.add('open');
+    pickerSheet.classList.add('open');
+    highlightWheel();
+    // позицию выставляем дважды: сразу и после начала анимации шторки
+    // (во время transform-перехода браузер может пересчитать snap)
+    pickerWheel.scrollTop = idx * ITEM_H;
+    setTimeout(() => {
+      pickerWheel.scrollTop = idx * ITEM_H;
+      highlightWheel();
+    }, 80);
+    // страхующий тик: подпись/подсветка всегда согласованы с прокруткой
+    // (интервал в видимой табе не нужен почти никогда — но выручает при snap-перескоках)
+    clearInterval(pickerTick);
+    pickerTick = setInterval(() => { if (pickerOpened) highlightWheel(); }, 200);
+  }
+
+  function closeWheel() {
+    if (!pickerOpened) return;
+    pickerOverlay.classList.remove('open');
+    pickerSheet.classList.remove('open');
+    pickerOpened = false;
+    clearInterval(pickerTick);
+    document.body.style.overflow = '';
+    setTimeout(() => {
+      if (!pickerOpened) { pickerOverlay.hidden = true; pickerSheet.hidden = true; }
+    }, 240);
+  }
+
+  // индекс значения, которое сейчас в центре колёсика
+  function wheelIndex() {
+    return Math.min(
+      pickerList.children.length - 1,
+      Math.max(0, Math.round(pickerWheel.scrollTop / ITEM_H))
+    );
+  }
+
+  function highlightWheel() {
+    const i = wheelIndex();
+    Array.from(pickerList.children).forEach((li, k) => li.classList.toggle('cur', k === i));
+    if (pickerConfig) pickerCurrent.textContent = wheelFmt(pickerConfig.min + i * pickerConfig.step);
+  }
+
+  // мгновенная реакция на прокрутку (intervальчик выше — только страховка)
+  pickerWheel.addEventListener('scroll', () => { if (pickerOpened) highlightWheel(); });
+
+  // тап по числу — мгновенно ставим его в центр (гладкая прокрутка конфликтует со scroll-snap)
+  pickerList.addEventListener('click', (e) => {
+    const li = e.target.closest('li');
+    if (!li) return;
+    const i = Array.from(pickerList.children).indexOf(li);
+    pickerWheel.scrollTo({ top: i * ITEM_H, behavior: 'auto' });
+  });
+
+  pickerDone.addEventListener('click', () => {
+    if (pickerInput && pickerConfig) {
+      pickerInput.value = wheelFmt(pickerConfig.min + wheelIndex() * pickerConfig.step);
+      pickerInput.dispatchEvent(new Event('input', { bubbles: true }));
+      pickerInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    closeWheel();
+  });
+
+  pickerOverlay.addEventListener('click', closeWheel);
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeWheel(); });
+
+  // вешаем шторку на все числовые поля (readonly — клавиатура не выезжает)
+  Object.keys(WHEEL_FIELDS).forEach((id) => {
+    const el = $(id);
+    if (el) el.addEventListener('click', () => openWheel(el));
+  });
+
+  /* ================= 8. Service Worker: полный офлайн ================= */
 
   // после установки кэширует «оболочку» приложения — сайт открывается без
   // интернета и запускается быстрее. Без интернета данные остаются в localStorage.
