@@ -18,9 +18,10 @@
   --accent-hover: #ff8433;
   --warn-text: #ffb775;
 
-  --radius: 12px;
-  --radius-sm: 8px;
-  --shadow: 0 10px 30px rgba(0, 0, 0, .45);
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-lg: 20px;
+  --shadow: 0 14px 38px rgba(0, 0, 0, .45);
 }
 
 * { box-sizing: border-box; }
@@ -117,9 +118,9 @@ body {
 /* ---------- Карточки ---------- */
 
 .card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: linear-gradient(180deg, #1f1f1f, #161616);
+  border: 1px solid #292929;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   padding: 22px;
   min-width: 0;
@@ -184,13 +185,13 @@ input[type="time"],
 input[type="text"],
 select {
   width: 100%;
-  padding: 10px 12px;
+  padding: 12px 14px;
   font: inherit;
   color: var(--text);
-  background: var(--bg-soft);
+  background: #161616;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  transition: border-color .15s ease, box-shadow .15s ease;
+  transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
 }
 
 select option { background: var(--bg-soft); color: var(--text); }
@@ -210,6 +211,19 @@ input[readonly] {
   color: var(--muted);
   background: #171717;
   cursor: default;
+}
+
+/* числовые поля открывают шторку-колёсико — курсор и стрелка-подсказка */
+input[type="number"][readonly] {
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 700;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%, var(--muted) 60%, transparent 60%),
+    linear-gradient(135deg, var(--muted) 40%, transparent 40%, transparent 50%, var(--muted) 50%);
+  background-position: calc(100% - 20px) 55%, calc(100% - 14px) 55%;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 34px;
 }
 
 /* ---------- Радио-кнопки ---------- */
@@ -1120,3 +1134,167 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 /* ---------- Мелкая полировка таблиц ---------- */
 
 .table-wrap tbody tr:nth-child(even) { background: rgba(255, 255, 255, .015); }
+/* ---------- Шторка-колёсико: выбор числа прокруткой ---------- */
+
+.picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  transition: opacity .22s ease;
+}
+
+.picker-overlay.open { opacity: 1; }
+
+.picker-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 91;
+  margin: 0 auto;
+  max-width: 560px;
+  background: linear-gradient(180deg, #242424, #1a1a1a);
+  border: 1px solid #313131;
+  border-bottom: 0;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -18px 50px rgba(0, 0, 0, .55);
+  padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+  transform: translateY(105%);
+  transition: transform .24s cubic-bezier(.2, .8, .25, 1);
+}
+
+.picker-sheet.open { transform: translateY(0); }
+
+/* «ручка» шторки */
+.picker-sheet::before {
+  content: "";
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 4px;
+  border-radius: 999px;
+  background: #3d3d3d;
+}
+
+.picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 2px 12px;
+}
+
+.picker-titles {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.picker-title {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .8px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.picker-value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.picker-value b {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.picker-value i {
+  font-style: normal;
+  color: var(--muted);
+  font-size: .85rem;
+}
+
+.picker-done {
+  flex: none;
+  padding: 12px 22px;
+  font: inherit;
+  font-size: .92rem;
+  font-weight: 800;
+  color: #140f08;
+  background: linear-gradient(135deg, #ff8a3d, #ff6b00);
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(255, 107, 0, .35);
+  transition: transform .08s ease, filter .15s ease;
+}
+
+.picker-done:hover { filter: brightness(1.08); }
+.picker-done:active { transform: translateY(1px); }
+
+/* само колёсико: прокрутка с прилипанием строк к центру */
+.picker-wheel {
+  height: 220px; /* 5 строк по 44px */
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: none;
+}
+
+.picker-wheel::-webkit-scrollbar { width: 0; height: 0; }
+
+/* затемнение сверху/снизу + оранжевая полоса по центру */
+.picker-wheel {
+  background:
+    linear-gradient(180deg,
+      rgba(255, 107, 0, 0) calc(50% - 22px),
+      rgba(255, 107, 0, .5) calc(50% - 22px) calc(50% - 21px),
+      rgba(255, 107, 0, .5) calc(50% + 21px) calc(50% + 22px),
+      rgba(255, 107, 0, 0) calc(50% + 22px)),
+    linear-gradient(180deg,
+      rgba(255, 107, 0, .07) calc(50% - 22px),
+      rgba(255, 107, 0, .07) calc(50% + 22px),
+      rgba(0, 0, 0, 0) calc(50% + 22px)),
+    linear-gradient(180deg,
+      #1d1d1d 0%,
+      rgba(29, 29, 29, 0) 25%,
+      rgba(29, 29, 29, 0) 75%,
+      #1d1d1d 100%);
+}
+
+.picker-wheel ul {
+  margin: 0;
+  padding: 88px 0; /* по 2 строки сверху/снизу — выбранная встаёт точно в центр */
+  list-style: none;
+}
+
+.picker-wheel li {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #6f6f6f;
+  scroll-snap-align: center;
+  cursor: pointer;
+  transition: color .12s ease, transform .12s ease;
+}
+
+.picker-wheel li.cur {
+  color: var(--text);
+  transform: scale(1.14);
+}
