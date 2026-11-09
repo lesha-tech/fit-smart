@@ -66,15 +66,15 @@
           <div class="field-row">
             <div class="field">
               <label for="age">Возраст</label>
-              <input type="number" id="age" name="age" min="14" max="90" step="1" placeholder="лет" required>
+              <input type="number" id="age" name="age" min="14" max="90" step="1" placeholder="лет" readonly required>
             </div>
             <div class="field">
               <label for="weight">Вес, кг</label>
-              <input type="number" id="weight" name="weight" min="30" max="300" step="0.1" placeholder="кг" required>
+              <input type="number" id="weight" name="weight" min="30" max="300" step="0.1" placeholder="кг" readonly required>
             </div>
             <div class="field">
               <label for="height">Рост, см</label>
-              <input type="number" id="height" name="height" min="120" max="250" step="1" placeholder="см" required>
+              <input type="number" id="height" name="height" min="120" max="250" step="1" placeholder="см" readonly required>
             </div>
           </div>
 
@@ -266,19 +266,20 @@
 
             <div class="field">
               <label for="sets">Подходы</label>
-              <input type="number" id="sets" name="sets" min="1" max="20" step="1" placeholder="3" required>
+              <input type="number" id="sets" name="sets" min="1" max="20" step="1" placeholder="3" readonly required>
             </div>
             <div class="field">
               <label for="reps">Повторения</label>
-              <input type="number" id="reps" name="reps" min="1" max="50" step="1" placeholder="8" required>
+              <input type="number" id="reps" name="reps" min="1" max="50" step="1" placeholder="8" readonly required>
             </div>
             <div class="field">
               <label for="bar-weight">Вес снаряда, кг</label>
-              <input type="number" id="bar-weight" name="bar-weight" min="0" max="500" step="0.5" placeholder="кг" required>
+              <input type="number" id="bar-weight" name="bar-weight" min="0" max="500" step="0.5" placeholder="кг" readonly required>
             </div>
 
             <button type="button" class="btn wide" id="add-exercise">Добавить упражнение</button>
           </div>
+          <p class="hint">Числа не нужно набирать вручную — нажми на поле подходов, повторений или веса, и снизу выедет шторка: прокрути до нужного числа и нажми «Выбрать».</p>
         </form>
 
         <div class="table-wrap">
@@ -356,19 +357,19 @@
           <div class="form-grid four">
             <div class="field">
               <label for="fs-kcal">Ккал</label>
-              <input type="number" id="fs-kcal" name="fs-kcal" min="0" max="10000" step="1" placeholder="0">
+              <input type="number" id="fs-kcal" name="fs-kcal" min="0" max="10000" step="1" placeholder="0" readonly>
             </div>
             <div class="field">
               <label for="fs-protein">Белки, г</label>
-              <input type="number" id="fs-protein" name="fs-protein" min="0" max="600" step="1" placeholder="0">
+              <input type="number" id="fs-protein" name="fs-protein" min="0" max="600" step="1" placeholder="0" readonly>
             </div>
             <div class="field">
               <label for="fs-fat">Жиры, г</label>
-              <input type="number" id="fs-fat" name="fs-fat" min="0" max="400" step="1" placeholder="0">
+              <input type="number" id="fs-fat" name="fs-fat" min="0" max="400" step="1" placeholder="0" readonly>
             </div>
             <div class="field">
               <label for="fs-carb">Углеводы, г</label>
-              <input type="number" id="fs-carb" name="fs-carb" min="0" max="1000" step="1" placeholder="0">
+              <input type="number" id="fs-carb" name="fs-carb" min="0" max="1000" step="1" placeholder="0" readonly>
             </div>
           </div>
           <button type="button" class="btn" id="fs-manual-show">Показать в таблице</button>
@@ -428,7 +429,7 @@
               </div>
               <div class="field">
                 <label for="fs-qty">Количество, порций</label>
-                <input type="number" id="fs-qty" name="fs-qty" min="0.05" max="50" step="0.1" placeholder="1">
+                <input type="number" id="fs-qty" name="fs-qty" min="0.05" max="50" step="0.1" placeholder="1" readonly>
               </div>
             </div>
             <p class="hint" id="fs-pick-info"></p>
@@ -484,6 +485,21 @@
       <p>Локальный проект. Данные хранятся в localStorage.</p>
     </div>
   </footer>
+
+  <!-- Шторка-колёсико для выбора чисел (wheel picker) -->
+  <div class="picker-overlay" id="picker-overlay" hidden></div>
+  <div class="picker-sheet" id="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="picker-title" hidden>
+    <div class="picker-head">
+      <div class="picker-titles">
+        <span class="picker-title" id="picker-title">Выбери число</span>
+        <span class="picker-value"><b id="picker-current">—</b><i id="picker-unit"></i></span>
+      </div>
+      <button type="button" class="picker-done" id="picker-done">Выбрать</button>
+    </div>
+    <div class="picker-wheel" id="picker-wheel" tabindex="-1">
+      <ul id="picker-list"></ul>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="app.js"></script>
