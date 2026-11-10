@@ -1,34 +1,27 @@
 /* ==========================================================
-   ALEX FIT — готическая тёмная тема (чистый CSS, без фреймворков)
+   FIT SMART — тёмная спортивная тема (чистый CSS, без фреймворков)
    ========================================================== */
 
 :root {
   color-scheme: dark;
 
-  /* Фон и поверхности */
-  --bg: #0a0a0a;
-  --bg-soft: #121212;
-  --card: #161616;
-  --card-2: #1e1e1e;
-  --border: #262626;
+  --bg: #0d0d0d;
+  --bg-soft: #141414;
+  --card: #1e1e1e;
+  --card-2: #262626;
+  --border: #2e2e2e;
 
-  /* Текст */
-  --text: #e8e8e8;
-  --muted: #8a8a8a;
+  --text: #f2f2f2;
+  --muted: #9b9b9b;
 
-  /* Готический фиолетовый акцент */
-  --accent: #b36bff;
-  --accent-hover: #d8a8ff;
-  --accent-dim: rgba(179, 107, 255, 0.14);
-  --accent-glow: rgba(179, 107, 255, 0.35);
-  --warn-text: #fca5a5;
+  --accent: #ff6b00;
+  --accent-hover: #ff8433;
+  --warn-text: #ffb775;
 
-  /* Радиусы — готика любит чёткие углы, но современная мягкость оставим */
-  --radius: 12px;
+  --radius: 14px;
   --radius-sm: 10px;
-  --radius-lg: 18px;
-
-  --shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+  --radius-lg: 20px;
+  --shadow: 0 14px 38px rgba(0, 0, 0, .45);
 }
 
 * { box-sizing: border-box; }
@@ -38,19 +31,19 @@ html { scroll-behavior: smooth; }
 body {
   margin: 0;
   background:
-    radial-gradient(900px 420px at 85% -80px, rgba(179, 107, 255, .08), transparent 65%),
+    radial-gradient(900px 420px at 85% -80px, rgba(255, 107, 0, .10), transparent 65%),
     var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.45;
   -webkit-font-smoothing: antialiased;
 }
 
-::selection { background: rgba(179, 107, 255, .4); }
+::selection { background: rgba(255, 107, 0, .35); }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 6px; border: 2px solid var(--bg); }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
 .container {
@@ -62,7 +55,7 @@ body {
 .hidden { display: none !important; }
 
 .accent {
-  background: linear-gradient(90deg, #b36bff, #d8a8ff);
+  background: linear-gradient(90deg, #ff6b00, #ffb020);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -77,7 +70,7 @@ body {
   z-index: 20;
   padding: 14px 0 12px;
   border-bottom: 1px solid var(--border);
-  background: linear-gradient(180deg, rgba(18, 18, 18, .95), rgba(10, 10, 10, .88));
+  background: linear-gradient(180deg, rgba(20, 20, 20, .95), rgba(13, 13, 13, .88));
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -91,23 +84,18 @@ body {
 
 .logo {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
   font-size: clamp(2rem, 5.5vw, 3.2rem);
-  font-weight: 700;
-  letter-spacing: 3px;
+  font-weight: 900;
+  letter-spacing: 2px;
   text-transform: uppercase;
   line-height: 1.05;
-  color: var(--text);
-  text-shadow: 0 0 16px rgba(179, 107, 255, .25);
 }
 
 .tagline {
   margin: 0;
   color: var(--muted);
-  font-size: .9rem;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  font-weight: 600;
+  font-size: .95rem;
+  letter-spacing: .4px;
 }
 
 /* ---------- Основная область ---------- */
@@ -125,56 +113,32 @@ body {
 /* ---------- Карточки ---------- */
 
 .card {
-  background: linear-gradient(180deg, #1b1b1b, #121212);
-  border: 1px solid #262626;
+  background: linear-gradient(180deg, #1f1f1f, #161616);
+  border: 1px solid #292929;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
-  padding: 24px;
+  padding: 22px;
   min-width: 0;
-  position: relative;
-  overflow: hidden;
 }
-
-/ лестная свеченая кайма карточек при наведении
-.card::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: var(--radius-lg);
-  padding: 1px;
-  background: linear-gradient(45deg, #6d28d9, #3b0764, #6d28d9);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0) border-box;
-  -webkit-mask-composite: destination-out;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity .25s ease;
-  pointer-events: none;
-}
-
-.card:hover::before { opacity: .45; }
 
 .card h2 {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 0 0 20px;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.25rem;
-  font-weight: 700;
+  gap: 10px;
+  margin: 0 0 18px;
+  font-size: 1.2rem;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--text);
+  letter-spacing: 1.2px;
 }
-
-.card h2 .tab-ico { filter: grayscale(.7) opacity(.85); }
 
 .card h2::before {
   content: "";
   flex: none;
   width: 5px;
-  height: 24px;
+  height: 22px;
   border-radius: 3px;
-  background: linear-gradient(180deg, var(--accent), #6d28d9);
+  background: var(--accent);
 }
 
 /* ---------- Поля ввода ---------- */
@@ -184,11 +148,11 @@ body {
 .field > label,
 .field-label {
   display: block;
-  margin-bottom: 8px;
-  font-size: .72rem;
+  margin-bottom: 6px;
+  font-size: .74rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: .8px;
   color: var(--muted);
 }
 
@@ -219,7 +183,7 @@ select {
   padding: 12px 14px;
   font: inherit;
   color: var(--text);
-  background: #121212;
+  background: #161616;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
@@ -235,16 +199,16 @@ input[type="text"]:focus,
 select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(179, 107, 255, .2);
+  box-shadow: 0 0 0 3px rgba(255, 107, 0, .22);
 }
 
 input[readonly] {
   color: var(--muted);
-  background: #141414;
+  background: #171717;
   cursor: default;
 }
 
-/ числовые поля открывают шторку-колёсико
+/* числовые поля открывают шторку-колёсико — курсор и стрелка-подсказка */
 input[type="number"][readonly] {
   cursor: pointer;
   color: var(--text);
@@ -257,7 +221,7 @@ input[type="number"][readonly] {
   padding-right: 34px;
 }
 
-/ ---------- Радио-кнопки ---------- */
+/* ---------- Радио-кнопки ---------- */
 
 .radio-field {
   margin: 0 0 12px;
@@ -267,11 +231,11 @@ input[type="number"][readonly] {
 
 .radio-field legend {
   padding: 0;
-  margin-bottom: 8px;
-  font-size: .72rem;
+  margin-bottom: 6px;
+  font-size: .74rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.5px;
+  letter-spacing: .8px;
   color: var(--muted);
 }
 
@@ -291,15 +255,14 @@ input[type="number"][readonly] {
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: border-color .15s ease, background-color .15s ease, color .15s ease;
+  transition: border-color .15s ease, background-color .15s ease;
 }
 
-.radio:hover { border-color: #3a3a3a; }
+.radio:hover { border-color: #3d3d3d; }
 
 .radio:has(input:checked) {
   border-color: var(--accent);
-  background: rgba(179, 107, 255, .08);
-  color: var(--text);
+  background: rgba(255, 107, 0, .08);
 }
 
 .radio input {
@@ -309,7 +272,7 @@ input[type="number"][readonly] {
   margin: 0;
 }
 
-/ ---------- Кнопки ---------- */
+/* ---------- Кнопки ---------- */
 
 .btn {
   display: inline-flex;
@@ -321,20 +284,20 @@ input[type="number"][readonly] {
   font: inherit;
   font-weight: 800;
   letter-spacing: .4px;
-  color: #0d0814;
-  background: linear-gradient(135deg, var(--accent), #9333ea);
+  color: #140f08;
+  background: linear-gradient(135deg, var(--accent), var(--accent-hover));
   border: none;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(179, 107, 255, .3);
+  box-shadow: 0 6px 18px rgba(255, 107, 0, .25);
   transition: filter .15s ease, box-shadow .15s ease, transform .08s ease;
 }
 
-.btn:hover { filter: brightness(1.12); }
+.btn:hover { filter: brightness(1.1); }
 
 .btn:active {
   transform: translateY(1px);
-  box-shadow: 0 5px 16px rgba(179, 107, 255, .22);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, .2);
 }
 
 .btn:focus-visible {
@@ -344,7 +307,7 @@ input[type="number"][readonly] {
 
 .btn-full { width: 100%; }
 
-/ ---------- Результаты ---------- */
+/* ---------- Результаты ---------- */
 
 .stats-grid {
   display: grid;
@@ -356,7 +319,7 @@ input[type="number"][readonly] {
 .stat {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
   padding: 14px;
   background: var(--bg-soft);
   border: 1px solid var(--border);
@@ -378,7 +341,6 @@ input[type="number"][readonly] {
   line-height: 1.15;
   font-variant-numeric: tabular-nums;
   overflow-wrap: break-word;
-  color: var(--text);
 }
 
 .stat.highlight .stat-value { color: var(--accent); }
@@ -446,7 +408,7 @@ input[type="number"][readonly] {
 
 .chart-box canvas { max-width: 100%; }
 
-/ ---------- Подсказки ---------- */
+/* ---------- Подсказки ---------- */
 
 .hint {
   margin: 8px 0 0;
@@ -455,7 +417,7 @@ input[type="number"][readonly] {
   color: var(--muted);
 }
 
-/ Группы мышц в выпадающем списке
+/* Группы мышц в выпадающем списке */
 select optgroup {
   background: #181818;
   color: var(--accent);
@@ -466,7 +428,7 @@ select optgroup {
 
 select option { padding: 4px 10px; }
 
-/ ---------- Предупреждение ---------- */
+/* ---------- Предупреждение ---------- */
 
 .warning {
   display: flex;
@@ -474,8 +436,8 @@ select option { padding: 4px 10px; }
   gap: 10px;
   margin-top: 14px;
   padding: 12px 14px;
-  background: rgba(179, 107, 255, .1);
-  border: 1px solid rgba(179, 107, 255, .45);
+  background: rgba(255, 107, 0, .12);
+  border: 1px solid rgba(255, 107, 0, .55);
   border-radius: 10px;
   color: var(--warn-text);
   font-size: .88rem;
@@ -484,7 +446,7 @@ select option { padding: 4px 10px; }
 
 .warning-icon { flex: none; }
 
-/ ---------- Таблицы ---------- */
+/* ---------- Таблицы ---------- */
 
 .table-wrap {
   margin-top: 16px;
@@ -516,7 +478,7 @@ select option { padding: 4px 10px; }
 
 .table-wrap tbody td { border-top: 1px solid var(--border); }
 
-.table-wrap tbody tr:hover { background: rgba(179, 107, 255, .04); }
+.table-wrap tbody tr:hover { background: rgba(255, 255, 255, .03); }
 
 .table-wrap tbody .empty td {
   color: var(--muted);
@@ -540,7 +502,7 @@ select option { padding: 4px 10px; }
   font-size: 1.05rem;
 }
 
-/ ---------- Файл CSV ---------- */
+/* ---------- Файл CSV ---------- */
 
 input[type="file"] {
   width: 100%;
@@ -556,7 +518,7 @@ input[type="file"]::file-selector-button {
   padding: 8px 16px;
   margin-right: 12px;
   background: var(--accent);
-  color: #0d0814;
+  color: #140f08;
   border: none;
   border-radius: 6px;
   font: inherit;
@@ -577,10 +539,10 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   font-size: .9rem;
 }
 
-/ ---------- Подвал ---------- */
+/* ---------- Подвал ---------- */
 
 .site-footer {
-  padding: 20px 0 30px;
+  padding: 18px 0 26px;
   border-top: 1px solid var(--border);
   color: var(--muted);
   font-size: .85rem;
@@ -589,8 +551,9 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 
 .site-footer p { margin: 0; }
 
-/ ---------- Адаптивность ---------- */
+/* ---------- Адаптивность ---------- */
 
+/* Телефон: всё в один столбец */
 @media (max-width: 620px) {
   .field-row,
   .form-grid.two,
@@ -601,6 +564,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 
   .card { padding: 18px 16px 20px; }
 
+  /* Полей БЖУ четыре — на телефоне удобнее оставить 2×2 */
   .form-grid.four { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
   .stat-value { font-size: 1.4rem; }
@@ -608,11 +572,11 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   .main-content { padding-top: 16px; }
 }
 
-/ ==========================================================
+/* ==========================================================
    Логика (этап 2): диаграмма-фолбэк, таблица питания, кнопки удаления
    ========================================================== */
 
-/ Оффлайн-диаграмма БЖУ (если Chart.js с CDN не загрузился)
+/* Оффлайн-диаграмма БЖУ (если Chart.js с CDN не загрузился) */
 .donut-stack {
   display: flex;
   flex-direction: column;
@@ -627,7 +591,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   border-radius: 50%;
   display: grid;
   place-items: center;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, .45);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .35);
 }
 
 .donut-hole {
@@ -659,7 +623,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   border-radius: 50%;
 }
 
-/ Кнопка удаления упражнения в таблице
+/* Кнопка удаления упражнения в таблице */
 .del-col { width: 36px; }
 
 .del-btn {
@@ -673,20 +637,20 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   transition: color .15s ease;
 }
 
-.del-btn:hover { color: var(--warn-text); }
+.del-btn:hover { color: #ff6f61; }
 
-/ Разница «съел − цель» в таблице питания
-.diff-over { color: #fca5a5; }
+/* Разница «съел − цель» в таблице питания */
+.diff-over { color: #ff6f61; }
 .diff-under { color: #a3e635; }
 
-/ Таблице питания из 4 колонок не нужен широкий скролл
+/* Таблице питания из 4 колонок не нужен широкий скролл */
 .nutrition table { min-width: 420px; }
 
-/ ==========================================================
+/* ==========================================================
    Питание: вкладки (итоги / скриншот / API / CSV), превью, API
    ========================================================== */
 
-/ Переключатель способов ввода
+/* Переключатель способов ввода */
 .seg {
   display: flex;
   flex-wrap: wrap;
@@ -708,7 +672,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   transition: border-color .15s ease, color .15s ease, background-color .15s ease, box-shadow .15s ease;
 }
 
-.seg-btn:hover { border-color: #3a3a3a; color: var(--text); }
+.seg-btn:hover { border-color: #3d3d3d; color: var(--text); }
 
 .seg-btn:focus-visible {
   outline: 2px solid var(--accent);
@@ -716,13 +680,13 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 }
 
 .seg-btn.active {
-  color: #0d0814;
+  color: #140f08;
   background: var(--accent);
   border-color: var(--accent);
-  box-shadow: 0 4px 14px rgba(179, 107, 255, .3);
+  box-shadow: 0 4px 14px rgba(255, 107, 0, .28);
 }
 
-/ Внутренние блоки карточки «Питание»
+/* Внутренние блоки карточки «Питание» */
 .nutri-panel h3 {
   margin: 6px 0 12px;
   font-size: .9rem;
@@ -742,9 +706,9 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 }
 
 .status-hint.ok { color: #a3e635; }
-.status-hint.err { color: #fca5a5; }
+.status-hint.err { color: #ff6f61; }
 
-/ Превью скриншота
+/* Превью скриншота */
 .shot-preview {
   margin-top: 14px;
   padding: 12px;
@@ -761,7 +725,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   border-radius: var(--radius-sm);
 }
 
-/ Мини-кнопка (второстепенное действие)
+/* Мини-кнопка (второстепенное действие) */
 .btn-mini {
   min-height: 36px;
   padding: 7px 14px;
@@ -783,7 +747,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   outline-offset: 2px;
 }
 
-/ FatSecret API: результаты поиска и дневник дня
+/* FatSecret API: результаты поиска и дневник дня */
 .api-results {
   display: grid;
   gap: 8px;
@@ -810,7 +774,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 
 .api-item:hover {
   border-color: var(--accent);
-  background: rgba(179, 107, 255, .06);
+  background: rgba(255, 107, 0, .06);
 }
 
 .api-brand { color: var(--muted); font-size: .8rem; }
@@ -850,13 +814,13 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   font-variant-numeric: tabular-nums;
 }
 
-.hint a { color: var(--accent); }
+.hint a { color: var(--warn-text); }
 
-/ ==========================================================
+/* ==========================================================
    Улучшения: статус тренировки, кнопка «Завершить», история
    ========================================================== */
 
-/ ---------- Живой статус текущей тренировки ---------- */
+/* ---------- Живой статус текущей тренировки ---------- */
 
 .workout-status {
   display: flex;
@@ -881,11 +845,11 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 
 .chip-accent {
   color: var(--accent);
-  background: rgba(179, 107, 255, .08);
-  border-color: rgba(179, 107, 255, .4);
+  background: rgba(255, 107, 0, .08);
+  border-color: rgba(255, 107, 0, .4);
 }
 
-/ ---------- Память пользователя (профиль) ---------- */
+/* ---------- Память пользователя (профиль) ---------- */
 
 .profile-saved {
   display: flex;
@@ -916,7 +880,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   gap: 10px;
 }
 
-/ ---------- Кнопка «Завершить тренировку» ---------- */
+/* ---------- Кнопка «Завершить тренировку» ---------- */
 
 .workout-actions {
   display: flex;
@@ -927,25 +891,25 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 
 .btn.btn-finish {
   width: 100%;
-  color: #0d1408;
+  color: #14210a;
   background: linear-gradient(135deg, #a3e635, #7cc922);
-  box-shadow: 0 8px 24px rgba(163, 230, 53, .28);
+  box-shadow: 0 6px 18px rgba(163, 230, 53, .22);
 }
 
 .btn.btn-finish:hover {
   background: linear-gradient(135deg, #b1ef4d, #8ad42c);
-  box-shadow: 0 10px 28px rgba(163, 230, 53, .35);
+  box-shadow: 0 8px 22px rgba(163, 230, 53, .3);
 }
 
 .btn.btn-finish:active {
-  box-shadow: 0 5px 16px rgba(163, 230, 53, .2);
+  box-shadow: 0 4px 12px rgba(163, 230, 53, .2);
 }
 
 .btn.btn-finish:focus-visible {
   outline-color: #a3e635;
 }
 
-/ ---------- График прогресса ---------- */
+/* ---------- График прогресса ---------- */
 
 .chart-wrap {
   margin: 4px 0 16px;
@@ -967,7 +931,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   height: 220px;
 }
 
-/ ---------- Группы мышц: чипы в таблицах ---------- */
+/* ---------- Группы мышц: чипы в таблицах ---------- */
 
 .mg {
   display: inline-block;
@@ -981,7 +945,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   white-space: nowrap;
 }
 
-/ ---------- Календарь недели ---------- */
+/* ---------- Календарь недели ---------- */
 
 .week-strip {
   display: grid;
@@ -1018,14 +982,14 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 }
 
 .wd.today {
-  border-color: rgba(179, 107, 255, .55);
+  border-color: rgba(255, 107, 0, .55);
 }
 
 .wd.today small { color: var(--accent); }
 
 .wd.today b { color: var(--accent); }
 
-/ ---------- Итоги недели (группы мышц) ---------- */
+/* ---------- Итоги недели (группы мышц) ---------- */
 
 .week-summary { margin: 0 0 16px; }
 
@@ -1047,18 +1011,18 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   white-space: nowrap;
 }
 
-/ ---------- Кнопка «Поделиться результатом» ---------- */
+/* ---------- Кнопка «Поделиться результатом» ---------- */
 
 .btn.btn-share {
   width: 100%;
   color: var(--accent);
   background: transparent;
-  border: 1.5px solid rgba(179, 107, 255, .55);
+  border: 1.5px solid rgba(255, 107, 0, .55);
   box-shadow: none;
 }
 
 .btn.btn-share:hover {
-  background: rgba(179, 107, 255, .08);
+  background: rgba(255, 107, 0, .08);
   filter: none;
 }
 
@@ -1071,7 +1035,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   outline-color: var(--accent);
 }
 
-/ ---------- История тренировок ---------- */
+/* ---------- История тренировок ---------- */
 
 .history-list {
   display: grid;
@@ -1086,7 +1050,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   transition: border-color .15s ease;
 }
 
-.hist-item.open { border-color: rgba(179, 107, 255, .45); }
+.hist-item.open { border-color: rgba(255, 107, 0, .45); }
 
 .hist-head {
   display: flex;
@@ -1103,7 +1067,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   cursor: pointer;
 }
 
-.hist-head:hover { background: rgba(179, 107, 255, .04); }
+.hist-head:hover { background: rgba(255, 255, 255, .03); }
 
 .hist-head:focus-visible {
   outline: 2px solid var(--accent);
@@ -1157,19 +1121,18 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   margin-top: 14px;
 }
 
-/ ---------- Мелкая полировка таблиц ---------- */
+/* ---------- Мелкая полировка таблиц ---------- */
 
-.table-wrap tbody tr:nth-child(even) { background: rgba(179, 107, 255, .015); }
-
-/ ---------- Шторка-колёсико: выбор числа прокруткой ---------- */
+.table-wrap tbody tr:nth-child(even) { background: rgba(255, 255, 255, .015); }
+/* ---------- Шторка-колёсико: выбор числа прокруткой ---------- */
 
 .picker-overlay {
   position: fixed;
   inset: 0;
   z-index: 90;
-  background: rgba(0, 0, 0, .65);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   opacity: 0;
   transition: opacity .22s ease;
 }
@@ -1184,11 +1147,11 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   z-index: 91;
   margin: 0 auto;
   max-width: 560px;
-  background: linear-gradient(180deg, #242424, #161616);
+  background: linear-gradient(180deg, #242424, #1a1a1a);
   border: 1px solid #313131;
   border-bottom: 0;
   border-radius: 22px 22px 0 0;
-  box-shadow: 0 -22px 60px rgba(0, 0, 0, .6);
+  box-shadow: 0 -18px 50px rgba(0, 0, 0, .55);
   padding: 14px 16px calc(16px + env(safe-area-inset-bottom, 0px));
   transform: translateY(105%);
   transition: transform .24s cubic-bezier(.2, .8, .25, 1);
@@ -1196,7 +1159,7 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 
 .picker-sheet.open { transform: translateY(0); }
 
-/ «ручка» шторки
+/* «ручка» шторки */
 .picker-sheet::before {
   content: "";
   position: absolute;
@@ -1245,7 +1208,6 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   font-weight: 800;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 12px var(--accent-glow);
 }
 
 .picker-value i {
@@ -1260,19 +1222,19 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   font: inherit;
   font-size: .92rem;
   font-weight: 800;
-  color: #0d0814;
-  background: linear-gradient(135deg, #d8a8ff, #b36bff);
+  color: #140f08;
+  background: linear-gradient(135deg, #ff8a3d, #ff6b00);
   border: 0;
   border-radius: 12px;
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba(179, 107, 255, .4);
+  box-shadow: 0 4px 16px rgba(255, 107, 0, .35);
   transition: transform .08s ease, filter .15s ease;
 }
 
-.picker-done:hover { filter: brightness(1.1); }
+.picker-done:hover { filter: brightness(1.08); }
 .picker-done:active { transform: translateY(1px); }
 
-/ само колёсико: прокрутка с прилипанием строк к центру
+/* само колёсико: прокрутка с прилипанием строк к центру */
 .picker-wheel {
   height: 220px; /* 5 строк по 44px */
   overflow-y: auto;
@@ -1283,22 +1245,19 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   scrollbar-width: none;
 }
 
-/ iOS: отключаем зум при двойном тапе по колёсику
-.picker-wheel li { touch-action: manipulation; }
-
 .picker-wheel::-webkit-scrollbar { width: 0; height: 0; }
 
-/ затемнение сверху/снизу + фиолетовая полоса по центру
+/* затемнение сверху/снизу + оранжевая полоса по центру */
 .picker-wheel {
   background:
     linear-gradient(180deg,
-      rgba(179, 107, 255, 0) calc(50% - 22px),
-      rgba(179, 107, 255, .55) calc(50% - 22px) calc(50% - 21px),
-      rgba(179, 107, 255, .55) calc(50% + 21px) calc(50% + 22px),
-      rgba(179, 107, 255, 0) calc(50% + 22px)),
+      rgba(255, 107, 0, 0) calc(50% - 22px),
+      rgba(255, 107, 0, .5) calc(50% - 22px) calc(50% - 21px),
+      rgba(255, 107, 0, .5) calc(50% + 21px) calc(50% + 22px),
+      rgba(255, 107, 0, 0) calc(50% + 22px)),
     linear-gradient(180deg,
-      rgba(179, 107, 255, .06) calc(50% - 22px),
-      rgba(179, 107, 255, .06) calc(50% + 22px),
+      rgba(255, 107, 0, .07) calc(50% - 22px),
+      rgba(255, 107, 0, .07) calc(50% + 22px),
       rgba(0, 0, 0, 0) calc(50% + 22px)),
     linear-gradient(180deg,
       #1d1d1d 0%,
@@ -1329,10 +1288,9 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 .picker-wheel li.cur {
   color: var(--text);
   transform: scale(1.14);
-  text-shadow: 0 0 14px var(--accent-glow);
 }
 
-/ ---------- Нижняя навигация по разделам ---------- */
+/* ---------- Нижняя навигация по разделам ---------- */
 
 .tabbar {
   position: fixed;
@@ -1341,10 +1299,10 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   right: 0;
   z-index: 80;
   padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
-  background: linear-gradient(180deg, rgba(18, 18, 18, .96), rgba(10, 10, 10, .99));
+  background: linear-gradient(180deg, rgba(22, 22, 22, .94), rgba(13, 13, 13, .98));
   border-top: 1px solid var(--border);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .tabbar-inner {
@@ -1370,13 +1328,13 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   border: 0;
   border-radius: 12px;
   cursor: pointer;
-  transition: color .15s ease, background-color .15s ease, filter .15s ease;
+  transition: color .15s ease, background-color .15s ease;
 }
 
 .tab-btn .tab-ico {
   font-size: 1.3rem;
   line-height: 1.1;
-  filter: grayscale(.9) opacity(.55);
+  filter: grayscale(1) opacity(.6);
   transition: filter .15s ease, transform .15s ease;
 }
 
@@ -1384,13 +1342,12 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 
 .tab-btn.active {
   color: var(--accent);
-  background: var(--accent-dim);
+  background: rgba(255, 107, 0, .09);
 }
 
 .tab-btn.active .tab-ico {
   filter: none;
-  transform: translateY(-1px) scale(1.08);
-  text-shadow: 0 0 10px var(--accent-glow);
+  transform: translateY(-1px) scale(1.06);
 }
 
 .tab-btn:focus-visible {
