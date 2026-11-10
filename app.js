@@ -1346,6 +1346,38 @@
 
   restore();
 
+  /* ================= 7. Разделы: нижняя навигация ================= */
+
+  // id секций для каждой вкладки
+  const TAB_SECTION = {
+    workouts: 'sec-workouts',
+    food: 'sec-food',
+    sleep: 'sec-sleep',
+    profile: 'sec-profile',
+  };
+
+  function showSection(name, save = true) {
+    if (!document.getElementById(TAB_SECTION[name])) name = 'workouts';
+    Object.keys(TAB_SECTION).forEach((k) => {
+      const el = document.getElementById(TAB_SECTION[k]);
+      if (el) el.classList.toggle('hidden', k !== name);
+    });
+    document.querySelectorAll('.tab-btn').forEach((b) => {
+      b.classList.toggle('active', b.dataset.tab === name);
+    });
+    // график Chart.js корректно отрисовывается только в видимой секции
+    if (name === 'workouts') renderHistory();
+    if (save) store('fit_tab', name);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('.tab-btn').forEach((b) => {
+    b.addEventListener('click', () => showSection(b.dataset.tab));
+  });
+
+  // открываем последний посещённый раздел
+  showSection(load('fit_tab', 'workouts'), false);
+
   /* ================= 7. Шторка-колёсико: выбор чисел прокруткой ================= */
 
   // Числовые поля и их диапазоны: id → { min, max, step, unit, def }
