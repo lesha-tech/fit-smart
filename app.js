@@ -1493,6 +1493,13 @@
     const i = Array.from(pickerList.children).indexOf(li);
     pickerWheel.scrollTo({ top: i * ITEM_H, behavior: 'auto' });
   });
+  // iOS: touchend срабатывает быстрее click — дублируем выбор числа
+  pickerList.addEventListener('touchend', (e) => {
+    const li = e.target.closest('li');
+    if (!li) return;
+    const i = Array.from(pickerList.children).indexOf(li);
+    pickerWheel.scrollTo({ top: i * ITEM_H, behavior: 'auto' });
+  });
 
   pickerDone.addEventListener('click', () => {
     if (pickerInput && pickerConfig) {
