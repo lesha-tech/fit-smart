@@ -30,8 +30,8 @@
 
   <main class="container main-content">
 
-    <!-- Верхняя сетка: форма слева, результаты справа -->
-    <div class="top-grid">
+    <!-- Раздел «Профиль»: анкета и результаты расчёта -->
+    <div class="app-section hidden" id="sec-profile">
 
       <!-- 2. Профиль -->
       <section class="card" id="profile-card" aria-labelledby="profile-title">
@@ -155,7 +155,7 @@
 
     </div>
 
-    <div class="stack">
+    <div class="app-section" id="sec-workouts">
 
       <!-- 4. Тренировка -->
       <section class="card" id="workout-card" aria-labelledby="workout-title">
@@ -336,6 +336,10 @@
         </div>
       </section>
 
+    </div>
+
+    <div class="app-section hidden" id="sec-food">
+
       <!-- 5. Питание (FatSecret) -->
       <section class="card" id="food-card" aria-labelledby="food-title">
         <h2 id="food-title">Питание 🍽️</h2>
@@ -456,6 +460,10 @@
         </div>
       </section>
 
+    </div>
+
+    <div class="app-section hidden" id="sec-sleep">
+
       <!-- 6. Сон -->
       <section class="card" id="sleep-card" aria-labelledby="sleep-title">
         <h2 id="sleep-title">Сон 😴</h2>
@@ -478,6 +486,16 @@
 
     </div>
   </main>
+
+  <!-- Нижняя навигация по разделам -->
+  <nav class="tabbar" id="tabbar" aria-label="Разделы">
+    <div class="tabbar-inner">
+      <button type="button" class="tab-btn active" data-tab="workouts"><span class="tab-ico">🏋️</span><span class="tab-lbl">Тренировки</span></button>
+      <button type="button" class="tab-btn" data-tab="food"><span class="tab-ico">🥗</span><span class="tab-lbl">БЖУ</span></button>
+      <button type="button" class="tab-btn" data-tab="sleep"><span class="tab-ico">😴</span><span class="tab-lbl">Сон</span></button>
+      <button type="button" class="tab-btn" data-tab="profile"><span class="tab-ico">👤</span><span class="tab-lbl">Профиль</span></button>
+    </div>
+  </nav>
 
   <!-- 7. Подвал -->
   <footer class="site-footer">
