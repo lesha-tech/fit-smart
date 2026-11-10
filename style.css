@@ -1277,10 +1277,14 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
   height: 220px; /* 5 строк по 44px */
   overflow-y: auto;
   scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch; /* momentum-прокрутка на iOS Safari */
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   scrollbar-width: none;
 }
+
+/ iOS: отключаем зум при двойном тапе по колёсику
+.picker-wheel li { touch-action: manipulation; }
 
 .picker-wheel::-webkit-scrollbar { width: 0; height: 0; }
 
