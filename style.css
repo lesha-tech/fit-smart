@@ -102,18 +102,13 @@ body {
 
 .main-content {
   padding-top: 24px;
-  padding-bottom: 40px;
-}
-
-.top-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 20px;
-  margin-bottom: 20px;
-  align-items: start;
+  padding-bottom: 96px; /* место под нижнюю навигацию */
 }
 
 .stack { display: grid; gap: 20px; }
+
+/* Разделы: видно только один одновременно */
+.app-section { display: grid; gap: 20px; }
 
 /* ---------- Карточки ---------- */
 
@@ -557,11 +552,6 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 .site-footer p { margin: 0; }
 
 /* ---------- Адаптивность ---------- */
-
-/* Ноутбук и уже: форма и результаты в одну колонку */
-@media (max-width: 920px) {
-  .top-grid { grid-template-columns: 1fr; }
-}
 
 /* Телефон: всё в один столбец */
 @media (max-width: 620px) {
@@ -1297,4 +1287,69 @@ input[type="file"]::file-selector-button:hover { background: var(--accent-hover)
 .picker-wheel li.cur {
   color: var(--text);
   transform: scale(1.14);
+}
+
+/* ---------- Нижняя навигация по разделам ---------- */
+
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 80;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(180deg, rgba(22, 22, 22, .94), rgba(13, 13, 13, .98));
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.tabbar-inner {
+  max-width: 560px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.tab-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 7px 4px 8px;
+  font: inherit;
+  font-size: .68rem;
+  font-weight: 700;
+  letter-spacing: .2px;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: color .15s ease, background-color .15s ease;
+}
+
+.tab-btn .tab-ico {
+  font-size: 1.3rem;
+  line-height: 1.1;
+  filter: grayscale(1) opacity(.6);
+  transition: filter .15s ease, transform .15s ease;
+}
+
+.tab-btn:hover { color: #cfcfcf; }
+
+.tab-btn.active {
+  color: var(--accent);
+  background: rgba(255, 107, 0, .09);
+}
+
+.tab-btn.active .tab-ico {
+  filter: none;
+  transform: translateY(-1px) scale(1.06);
+}
+
+.tab-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
